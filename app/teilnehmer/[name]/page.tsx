@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import TippFormular from '@/components/TippFormular';
 import Card from '@/components/ui/Card';
-import { Spieler, Turnier, Tipp, TurnierErgebnis, RUNDEN_NAMEN, Runde } from '@/lib/types';
+import { Spieler, Turnier, Tipp, TurnierErgebnis, RUNDEN_NAMEN, Runde, PUNKTE_PRO_RUNDE } from '@/lib/types';
 
 export default function TeilnehmerTippPage() {
   const params = useParams();
@@ -111,13 +111,21 @@ export default function TeilnehmerTippPage() {
   function getSpielerStatus(id: string) {
     const ergebnis = ergebnisse.find(e => e.spielerId === id);
     if (!ergebnis) {
-      return { runde: null, nochDabei: true, rundenName: null };
+      return { runde: null, nochDabei: true, rundenName: null, punkte: 0 };
     }
     return {
       runde: ergebnis.runde,
       nochDabei: ergebnis.out !== true,
       rundenName: RUNDEN_NAMEN[ergebnis.runde as Runde],
+      punkte: PUNKTE_PRO_RUNDE[ergebnis.runde as Runde] || 0,
     };
+  }
+
+  function berechneKategoriePunkte(spielerIds: string[]) {
+    return spielerIds.reduce((sum, id) => {
+      const status = getSpielerStatus(id);
+      return sum + status.punkte;
+    }, 0);
   }
 
   if (loading) {
@@ -176,7 +184,7 @@ export default function TeilnehmerTippPage() {
 
         {existierenderTipp ? (
           <div className="grid md:grid-cols-2 gap-4">
-            <Card title="Herren-Auswahl">
+            <Card title="Herren-Auswahl" subtitle={`${berechneKategoriePunkte(existierenderTipp.herren).toFixed(1)} Punkte`}>
               <div className="space-y-2">
                 {existierenderTipp.herren.map(id => {
                   const info = getSpielerInfo(id);
@@ -186,25 +194,28 @@ export default function TeilnehmerTippPage() {
                   return (
                     <div
                       key={id}
-                      className={`p-3 rounded-lg flex items-center justify-between ${isSieger ? 'bg-amber-50 border border-amber-200' :
-                          status.nochDabei ? 'bg-emerald-50 border border-emerald-100' : 'bg-slate-50 border border-slate-100'
+                      className={`p-2.5 rounded-lg flex items-center justify-between text-sm ${isSieger ? 'bg-amber-50 border border-amber-200' :
+                        status.nochDabei ? 'bg-emerald-50 border border-emerald-100' : 'bg-slate-50 border border-slate-100'
                         }`}
                     >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="text-slate-400 text-xs w-5">{info.ranking}</span>
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="text-slate-400 text-xs w-4">{info.ranking}</span>
                         <span className={`truncate ${status.nochDabei ? 'font-medium text-slate-900' : 'text-slate-500'}`}>
                           {info.name}
                         </span>
-                        {isSieger && <span className="text-amber-500 flex-shrink-0">★</span>}
+                        {isSieger && <span className="text-amber-500">★</span>}
                       </div>
-                      <div className="flex-shrink-0 ml-2">
+                      <div className="flex items-center gap-1.5 flex-shrink-0 ml-1">
+                        <span className={`font-semibold text-xs tabular-nums ${status.punkte > 0 ? 'text-emerald-600' : 'text-slate-400'}`}>
+                          {status.punkte.toFixed(1)}
+                        </span>
                         {status.nochDabei ? (
-                          <span className="badge badge-green">
-                            {status.rundenName ? `In ${status.rundenName}` : 'Dabei'}
+                          <span className="badge badge-green text-xs">
+                            {status.rundenName || 'Dabei'}
                           </span>
                         ) : (
-                          <span className="badge badge-gray">
-                            Out {status.rundenName}
+                          <span className="badge badge-gray text-xs">
+                            Out
                           </span>
                         )}
                       </div>
@@ -214,7 +225,7 @@ export default function TeilnehmerTippPage() {
               </div>
             </Card>
 
-            <Card title="Damen-Auswahl">
+            <Card title="Damen-Auswahl" subtitle={`${berechneKategoriePunkte(existierenderTipp.damen).toFixed(1)} Punkte`}>
               <div className="space-y-2">
                 {existierenderTipp.damen.map(id => {
                   const info = getSpielerInfo(id);
@@ -224,25 +235,28 @@ export default function TeilnehmerTippPage() {
                   return (
                     <div
                       key={id}
-                      className={`p-3 rounded-lg flex items-center justify-between ${isSieger ? 'bg-amber-50 border border-amber-200' :
-                          status.nochDabei ? 'bg-emerald-50 border border-emerald-100' : 'bg-slate-50 border border-slate-100'
+                      className={`p-2.5 rounded-lg flex items-center justify-between text-sm ${isSieger ? 'bg-amber-50 border border-amber-200' :
+                        status.nochDabei ? 'bg-emerald-50 border border-emerald-100' : 'bg-slate-50 border border-slate-100'
                         }`}
                     >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="text-slate-400 text-xs w-5">{info.ranking}</span>
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="text-slate-400 text-xs w-4">{info.ranking}</span>
                         <span className={`truncate ${status.nochDabei ? 'font-medium text-slate-900' : 'text-slate-500'}`}>
                           {info.name}
                         </span>
-                        {isSieger && <span className="text-amber-500 flex-shrink-0">★</span>}
+                        {isSieger && <span className="text-amber-500">★</span>}
                       </div>
-                      <div className="flex-shrink-0 ml-2">
+                      <div className="flex items-center gap-1.5 flex-shrink-0 ml-1">
+                        <span className={`font-semibold text-xs tabular-nums ${status.punkte > 0 ? 'text-emerald-600' : 'text-slate-400'}`}>
+                          {status.punkte.toFixed(1)}
+                        </span>
                         {status.nochDabei ? (
-                          <span className="badge badge-green">
-                            {status.rundenName ? `In ${status.rundenName}` : 'Dabei'}
+                          <span className="badge badge-green text-xs">
+                            {status.rundenName || 'Dabei'}
                           </span>
                         ) : (
-                          <span className="badge badge-gray">
-                            Out {status.rundenName}
+                          <span className="badge badge-gray text-xs">
+                            Out
                           </span>
                         )}
                       </div>
