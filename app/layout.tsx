@@ -1,12 +1,6 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
 import './globals.css';
 import Navigation from '@/components/Navigation';
-
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-});
 
 export const metadata: Metadata = {
   title: 'Tennis Tippspiel',
@@ -23,7 +17,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   viewportFit: 'cover',
-  themeColor: '#ffffff',
+  themeColor: '#f8fafc',
 };
 
 export default function RootLayout({
@@ -33,9 +27,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="de">
-      <body className={`${inter.className} antialiased`}>
+      <body>
         <Navigation />
-        <main className="section page-container">
+        <main className="container-app page-wrapper">
           {children}
         </main>
       </body>

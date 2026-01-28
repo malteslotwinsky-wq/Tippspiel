@@ -3,7 +3,7 @@ import Rangliste from '@/components/Rangliste';
 import TurnierDraw from '@/components/TurnierDraw';
 import Card from '@/components/ui/Card';
 import { getTurniere, getTipps, getErgebnisse, getSpieler } from '@/lib/daten';
-import { berechneRangliste, berechnePunkteFuerSpieler } from '@/lib/punkte';
+import { berechneRangliste } from '@/lib/punkte';
 import { RUNDEN_NAMEN, Runde, PUNKTE_PRO_RUNDE } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -19,10 +19,16 @@ export default async function RanglistePage() {
   if (!aktivTurnier) {
     return (
       <Card>
-        <div className="text-center py-8 text-gray-500">
-          <p className="text-xl mb-4">Kein aktives Turnier</p>
-          <Link href="/admin" className="text-green-600 hover:underline">
-            Als Admin ein Turnier erstellen
+        <div className="empty-state">
+          <div className="empty-state-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <p className="empty-state-title">Kein aktives Turnier</p>
+          <p className="empty-state-text mb-4">Erstelle ein Turnier im Admin-Bereich.</p>
+          <Link href="/admin" className="btn-secondary btn-sm">
+            Zum Admin-Bereich
           </Link>
         </div>
       </Card>
@@ -33,7 +39,6 @@ export default async function RanglistePage() {
   const turnierErgebnisse = ergebnisse.filter(e => e.turnierId === aktivTurnier.id);
   const turnierTipps = tipps.filter(t => t.turnierId === aktivTurnier.id);
 
-  // Get all players with results for this tournament
   const alleSpieler = [...spielerData.herren, ...spielerData.damen];
   const spielerMitErgebnis = turnierErgebnisse.map(e => {
     const spieler = alleSpieler.find(s => s.id === e.spielerId);
@@ -47,14 +52,12 @@ export default async function RanglistePage() {
   const herrenErgebnisse = spielerMitErgebnis.filter(e => e.geschlecht === 'herren');
   const damenErgebnisse = spielerMitErgebnis.filter(e => e.geschlecht === 'damen');
 
-  // Get all picked players with their points
   const ausgewaehlteSpielerIds = new Set<string>();
   turnierTipps.forEach(tipp => {
     tipp.herren.forEach(id => ausgewaehlteSpielerIds.add(id));
     tipp.damen.forEach(id => ausgewaehlteSpielerIds.add(id));
   });
 
-  // Count how many participants picked each player
   const spielerPickCount = new Map<string, number>();
   turnierTipps.forEach(tipp => {
     [...tipp.herren, ...tipp.damen].forEach(id => {
@@ -62,14 +65,11 @@ export default async function RanglistePage() {
     });
   });
 
-  // Calculate points for each picked player
   const ausgewaehlteSpielerMitPunkten = Array.from(ausgewaehlteSpielerIds).map(id => {
     const spieler = alleSpieler.find(s => s.id === id);
     const ergebnis = turnierErgebnisse.find(e => e.spielerId === id);
     const punkte = ergebnis ? PUNKTE_PRO_RUNDE[ergebnis.runde as Runde] : 0;
-    // Player is "noch dabei" if no result OR result exists but out !== true
     const nochDabei = !ergebnis || !ergebnis.out;
-
     return {
       id,
       name: spieler?.name || 'Unbekannt',
@@ -82,7 +82,6 @@ export default async function RanglistePage() {
     };
   });
 
-  // Sort by points (descending), then by ranking
   const herrenMitPunkten = ausgewaehlteSpielerMitPunkten
     .filter(s => s.geschlecht === 'herren')
     .sort((a, b) => b.punkte - a.punkte || a.ranking - b.ranking);
@@ -93,151 +92,142 @@ export default async function RanglistePage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-gray-900">Rangliste</h1>
+      {/* Page Header */}
+      <div className="page-header">
+        <h1 className="page-title">Rangliste</h1>
+        <p className="page-subtitle">{aktivTurnier.name} {aktivTurnier.jahr}</p>
+      </div>
 
-      <Rangliste
-        rangliste={rangliste}
-        turniername={`${aktivTurnier.name} ${aktivTurnier.jahr}`}
-      />
+      {/* Main Rangliste */}
+      <Rangliste rangliste={rangliste} />
 
       {/* Draw Visualization */}
       {turnierErgebnisse.some(e => e.runde >= 4) && (
-        <div className="grid md:grid-cols-2 gap-6">
-          <Card title="Turnierbaum Herren">
-            <TurnierDraw
-              ergebnisse={turnierErgebnisse}
-              spieler={alleSpieler}
-              geschlecht="herren"
-            />
-          </Card>
-          <Card title="Turnierbaum Damen">
-            <TurnierDraw
-              ergebnisse={turnierErgebnisse}
-              spieler={alleSpieler}
-              geschlecht="damen"
-            />
-          </Card>
-        </div>
+        <section>
+          <h2 className="section-header">Turnierbaum</h2>
+          <div className="grid md:grid-cols-2 gap-4">
+            <Card title="Herren">
+              <TurnierDraw ergebnisse={turnierErgebnisse} spieler={alleSpieler} geschlecht="herren" />
+            </Card>
+            <Card title="Damen">
+              <TurnierDraw ergebnisse={turnierErgebnisse} spieler={alleSpieler} geschlecht="damen" />
+            </Card>
+          </div>
+        </section>
       )}
 
+      {/* Tournament Results */}
       {turnierErgebnisse.length > 0 && (
-        <div className="grid md:grid-cols-2 gap-6">
-          <Card title="Turnierergebnisse Herren">
-            {herrenErgebnisse.length === 0 ? (
-              <p className="text-gray-500">Noch keine Ergebnisse</p>
-            ) : (
-              <div className="space-y-1">
-                {herrenErgebnisse.map(e => (
-                  <div key={e.spielerId} className="flex justify-between py-1">
-                    <span>{e.spielerName}</span>
-                    <span className="text-gray-600">
-                      {RUNDEN_NAMEN[e.runde as Runde]}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </Card>
-
-          <Card title="Turnierergebnisse Damen">
-            {damenErgebnisse.length === 0 ? (
-              <p className="text-gray-500">Noch keine Ergebnisse</p>
-            ) : (
-              <div className="space-y-1">
-                {damenErgebnisse.map(e => (
-                  <div key={e.spielerId} className="flex justify-between py-1">
-                    <span>{e.spielerName}</span>
-                    <span className="text-gray-600">
-                      {RUNDEN_NAMEN[e.runde as Runde]}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </Card>
-        </div>
+        <section>
+          <h2 className="section-header">Turnierergebnisse</h2>
+          <div className="grid md:grid-cols-2 gap-4">
+            <Card title="Herren">
+              {herrenErgebnisse.length === 0 ? (
+                <p className="text-sm text-slate-500">Noch keine Ergebnisse</p>
+              ) : (
+                <div className="space-y-1">
+                  {herrenErgebnisse.map(e => (
+                    <div key={e.spielerId} className="flex justify-between py-1.5 text-sm">
+                      <span className="text-slate-900">{e.spielerName}</span>
+                      <span className="text-slate-500">{RUNDEN_NAMEN[e.runde as Runde]}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+            <Card title="Damen">
+              {damenErgebnisse.length === 0 ? (
+                <p className="text-sm text-slate-500">Noch keine Ergebnisse</p>
+              ) : (
+                <div className="space-y-1">
+                  {damenErgebnisse.map(e => (
+                    <div key={e.spielerId} className="flex justify-between py-1.5 text-sm">
+                      <span className="text-slate-900">{e.spielerName}</span>
+                      <span className="text-slate-500">{RUNDEN_NAMEN[e.runde as Runde]}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+          </div>
+        </section>
       )}
 
-      {/* Ausgewählte Spieler mit Punkten */}
-      <div className="grid md:grid-cols-2 gap-6">
-        <Card title="Ausgewählte Herren - Punktestand">
-          <div className="space-y-1">
-            {herrenMitPunkten.map(s => (
-              <div
-                key={s.id}
-                className={`flex items-center justify-between py-1.5 px-2 rounded ${
-                  s.nochDabei ? 'bg-green-50' : 'bg-gray-50'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-gray-400 text-sm w-6">{s.ranking}.</span>
-                  <span className={s.nochDabei ? 'font-medium' : 'text-gray-500'}>
-                    {s.name}
-                  </span>
-                  {!s.nochDabei && s.runde && (
-                    <span className="text-xs text-gray-400">
-                      (out: {RUNDEN_NAMEN[s.runde as Runde]})
+      {/* Selected Players */}
+      <section>
+        <h2 className="section-header">Ausgewählte Spieler</h2>
+        <div className="grid md:grid-cols-2 gap-4">
+          <Card title="Herren">
+            <div className="space-y-1 max-h-80 overflow-y-auto scrollbar-thin">
+              {herrenMitPunkten.length === 0 ? (
+                <p className="text-sm text-slate-500 text-center py-2">Keine Spieler ausgewählt</p>
+              ) : herrenMitPunkten.map(s => (
+                <div
+                  key={s.id}
+                  className={`flex items-center justify-between py-2 px-2 rounded-lg text-sm ${s.nochDabei ? 'bg-emerald-50' : 'bg-slate-50'
+                    }`}
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-slate-400 text-xs w-5 flex-shrink-0">{s.ranking}</span>
+                    <span className={`truncate ${s.nochDabei ? 'font-medium text-slate-900' : 'text-slate-500'}`}>
+                      {s.name}
                     </span>
-                  )}
+                    {!s.nochDabei && s.runde && (
+                      <span className="badge badge-gray flex-shrink-0">
+                        {RUNDEN_NAMEN[s.runde as Runde]}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className="text-xs text-slate-400">{s.anzahlPicks}×</span>
+                    <span className={`font-semibold tabular-nums ${s.punkte > 0 ? 'text-emerald-600' : 'text-slate-400'}`}>
+                      {s.punkte.toFixed(1)}
+                    </span>
+                    {s.nochDabei && (
+                      <span className="w-2 h-2 bg-emerald-500 rounded-full" title="Noch dabei" />
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-gray-400" title="Anzahl Teilnehmer die diesen Spieler gewählt haben">
-                    {s.anzahlPicks}x
-                  </span>
-                  <span className={`font-bold ${s.punkte > 0 ? 'text-green-600' : 'text-gray-400'}`}>
-                    {s.punkte.toFixed(1)}
-                  </span>
-                  {s.nochDabei && (
-                    <span className="w-2 h-2 bg-green-500 rounded-full" title="Noch im Turnier"></span>
-                  )}
-                </div>
-              </div>
-            ))}
-            {herrenMitPunkten.length === 0 && (
-              <p className="text-gray-500 text-center py-2">Keine Spieler ausgewählt</p>
-            )}
-          </div>
-        </Card>
+              ))}
+            </div>
+          </Card>
 
-        <Card title="Ausgewählte Damen - Punktestand">
-          <div className="space-y-1">
-            {damenMitPunkten.map(s => (
-              <div
-                key={s.id}
-                className={`flex items-center justify-between py-1.5 px-2 rounded ${
-                  s.nochDabei ? 'bg-green-50' : 'bg-gray-50'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-gray-400 text-sm w-6">{s.ranking}.</span>
-                  <span className={s.nochDabei ? 'font-medium' : 'text-gray-500'}>
-                    {s.name}
-                  </span>
-                  {!s.nochDabei && s.runde && (
-                    <span className="text-xs text-gray-400">
-                      (out: {RUNDEN_NAMEN[s.runde as Runde]})
+          <Card title="Damen">
+            <div className="space-y-1 max-h-80 overflow-y-auto scrollbar-thin">
+              {damenMitPunkten.length === 0 ? (
+                <p className="text-sm text-slate-500 text-center py-2">Keine Spielerinnen ausgewählt</p>
+              ) : damenMitPunkten.map(s => (
+                <div
+                  key={s.id}
+                  className={`flex items-center justify-between py-2 px-2 rounded-lg text-sm ${s.nochDabei ? 'bg-emerald-50' : 'bg-slate-50'
+                    }`}
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-slate-400 text-xs w-5 flex-shrink-0">{s.ranking}</span>
+                    <span className={`truncate ${s.nochDabei ? 'font-medium text-slate-900' : 'text-slate-500'}`}>
+                      {s.name}
                     </span>
-                  )}
+                    {!s.nochDabei && s.runde && (
+                      <span className="badge badge-gray flex-shrink-0">
+                        {RUNDEN_NAMEN[s.runde as Runde]}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className="text-xs text-slate-400">{s.anzahlPicks}×</span>
+                    <span className={`font-semibold tabular-nums ${s.punkte > 0 ? 'text-emerald-600' : 'text-slate-400'}`}>
+                      {s.punkte.toFixed(1)}
+                    </span>
+                    {s.nochDabei && (
+                      <span className="w-2 h-2 bg-emerald-500 rounded-full" title="Noch dabei" />
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-gray-400" title="Anzahl Teilnehmer die diesen Spieler gewählt haben">
-                    {s.anzahlPicks}x
-                  </span>
-                  <span className={`font-bold ${s.punkte > 0 ? 'text-green-600' : 'text-gray-400'}`}>
-                    {s.punkte.toFixed(1)}
-                  </span>
-                  {s.nochDabei && (
-                    <span className="w-2 h-2 bg-green-500 rounded-full" title="Noch im Turnier"></span>
-                  )}
-                </div>
-              </div>
-            ))}
-            {damenMitPunkten.length === 0 && (
-              <p className="text-gray-500 text-center py-2">Keine Spielerinnen ausgewählt</p>
-            )}
-          </div>
-        </Card>
-      </div>
+              ))}
+            </div>
+          </Card>
+        </div>
+      </section>
     </div>
   );
 }
