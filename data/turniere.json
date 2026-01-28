@@ -1,0 +1,16 @@
+[
+  {
+    "id": "ao2025",
+    "name": "Australian Open",
+    "jahr": 2025,
+    "aktiv": false,
+    "abgabeSchluss": "2025-01-12T00:00:00Z"
+  },
+  {
+    "id": "australian-open-2026",
+    "name": "Australian Open",
+    "jahr": 2026,
+    "aktiv": true,
+    "abgabeSchluss": "2026-01-24T11:37:00.000Z"
+  }
+]

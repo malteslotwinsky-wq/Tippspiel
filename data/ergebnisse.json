@@ -1,0 +1,403 @@
+[
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h16",
+    "runde": 4,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h19",
+    "runde": 4,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h85",
+    "runde": 3,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h114",
+    "runde": 2,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h60",
+    "runde": 2,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h96",
+    "runde": 2,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h100",
+    "runde": 2,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h82",
+    "runde": 2,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d17",
+    "runde": 4
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d51",
+    "runde": 4
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d26",
+    "runde": 4,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d5",
+    "runde": 6
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d78",
+    "runde": 4
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d37",
+    "runde": 3,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d14",
+    "runde": 3
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h18",
+    "runde": 4
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h22",
+    "runde": 4
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h13",
+    "runde": 3,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h113",
+    "runde": 3,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d117",
+    "runde": 2,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d89",
+    "runde": 3,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d48",
+    "runde": 2,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d16",
+    "runde": 2,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d50",
+    "runde": 3,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d105",
+    "runde": 3,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d96",
+    "runde": 2,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d63",
+    "runde": 2,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d79",
+    "runde": 3,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d85",
+    "runde": 2,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d91",
+    "runde": 3,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h17",
+    "runde": 1,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h37",
+    "runde": 1,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h72",
+    "runde": 2,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h84",
+    "runde": 1,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h101",
+    "runde": 1,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h108",
+    "runde": 1,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h120",
+    "runde": 1,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h125",
+    "runde": 2,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d9",
+    "runde": 1,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d18",
+    "runde": 1,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d68",
+    "runde": 1,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d84",
+    "runde": 1,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d87",
+    "runde": 1,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d98",
+    "runde": 1,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d102",
+    "runde": 1,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d103",
+    "runde": 1,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d116",
+    "runde": 1,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d7",
+    "runde": 1,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d99",
+    "runde": 4,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h3",
+    "runde": 6,
+    "out": false
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h4",
+    "runde": 6,
+    "out": false
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h6",
+    "runde": 5,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h5",
+    "runde": 5,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h7",
+    "runde": 1,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h8",
+    "runde": 5,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h9",
+    "runde": 4,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h10",
+    "runde": 4,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h11",
+    "runde": 4,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h12",
+    "runde": 4,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d2",
+    "runde": 5,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d3",
+    "runde": 5,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d12",
+    "runde": 6,
+    "out": false
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d4",
+    "runde": 5,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d13",
+    "runde": 4,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d29",
+    "runde": 5,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d62",
+    "runde": 6,
+    "out": false
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d70",
+    "runde": 4,
+    "out": true
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d83",
+    "runde": 4,
+    "out": true
+  }
+]

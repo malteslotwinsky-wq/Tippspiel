@@ -1,0 +1,407 @@
+[
+  {
+    "teilnehmerName": "Ali",
+    "turnierId": "australian-open-2026",
+    "herren": [
+      "h1",
+      "h2",
+      "h3",
+      "h6",
+      "h9",
+      "h84",
+      "h96",
+      "h11"
+    ],
+    "damen": [
+      "d1",
+      "d2",
+      "d3",
+      "d4",
+      "d18",
+      "d85",
+      "d116",
+      "d117"
+    ],
+    "siegerHerren": "h1",
+    "siegerDamen": "d1",
+    "abgegebenAm": "2026-01-25T16:14:39.618Z"
+  },
+  {
+    "teilnehmerName": "Carlotta",
+    "turnierId": "australian-open-2026",
+    "herren": [
+      "h1",
+      "h2",
+      "h4",
+      "h6",
+      "h10",
+      "h85",
+      "h120",
+      "h11"
+    ],
+    "damen": [
+      "d1",
+      "d3",
+      "d4",
+      "d12",
+      "d18",
+      "d26",
+      "d98",
+      "d116"
+    ],
+    "siegerHerren": "h1",
+    "siegerDamen": "d1",
+    "abgegebenAm": "2026-01-25T15:44:06.445Z"
+  },
+  {
+    "teilnehmerName": "Fabi",
+    "turnierId": "australian-open-2026",
+    "herren": [
+      "h1",
+      "h2",
+      "h4",
+      "h9",
+      "h10",
+      "h96",
+      "h100",
+      "h11"
+    ],
+    "damen": [
+      "d1",
+      "d2",
+      "d3",
+      "d4",
+      "d12",
+      "d18",
+      "d68",
+      "d116"
+    ],
+    "siegerHerren": "h2",
+    "siegerDamen": "d1",
+    "abgegebenAm": "2026-01-25T15:46:25.755Z"
+  },
+  {
+    "teilnehmerName": "Felix",
+    "turnierId": "australian-open-2026",
+    "herren": [
+      "h1",
+      "h2",
+      "h4",
+      "h7",
+      "h9",
+      "h10",
+      "h96",
+      "h120"
+    ],
+    "damen": [
+      "d1",
+      "d2",
+      "d3",
+      "d13",
+      "d48",
+      "d79",
+      "d84",
+      "d4"
+    ],
+    "siegerHerren": "h1",
+    "siegerDamen": "d4",
+    "abgegebenAm": "2026-01-25T15:47:58.926Z"
+  },
+  {
+    "teilnehmerName": "Flo",
+    "turnierId": "australian-open-2026",
+    "herren": [
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h9",
+      "h72",
+      "h96",
+      "h11"
+    ],
+    "damen": [
+      "d1",
+      "d2",
+      "d3",
+      "d4",
+      "d12",
+      "d85",
+      "d87",
+      "d103"
+    ],
+    "siegerHerren": "h2",
+    "siegerDamen": "d1",
+    "abgegebenAm": "2026-01-25T15:48:45.916Z"
+  },
+  {
+    "teilnehmerName": "Jonas B.",
+    "turnierId": "australian-open-2026",
+    "herren": [
+      "h1",
+      "h2",
+      "h3",
+      "h5",
+      "h13",
+      "h19",
+      "h37",
+      "h101"
+    ],
+    "damen": [
+      "d1",
+      "d2",
+      "d3",
+      "d13",
+      "d26",
+      "d83",
+      "d116",
+      "d50"
+    ],
+    "siegerHerren": "h2",
+    "siegerDamen": "d1",
+    "abgegebenAm": "2026-01-25T16:17:35.385Z"
+  },
+  {
+    "teilnehmerName": "Jonas H.",
+    "turnierId": "australian-open-2026",
+    "herren": [
+      "h1",
+      "h2",
+      "h3",
+      "h8",
+      "h9",
+      "h10",
+      "h82",
+      "h108"
+    ],
+    "damen": [
+      "d1",
+      "d2",
+      "d3",
+      "d4",
+      "d85",
+      "d99",
+      "d116",
+      "d9"
+    ],
+    "siegerHerren": "h2",
+    "siegerDamen": "d1",
+    "abgegebenAm": "2026-01-25T16:18:24.353Z"
+  },
+  {
+    "teilnehmerName": "Kenny",
+    "turnierId": "australian-open-2026",
+    "herren": [
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h9",
+      "h82",
+      "h96",
+      "h11"
+    ],
+    "damen": [
+      "d1",
+      "d3",
+      "d4",
+      "d5",
+      "d12",
+      "d16",
+      "d63",
+      "d85"
+    ],
+    "siegerHerren": "h1",
+    "siegerDamen": "d1",
+    "abgegebenAm": "2026-01-25T16:19:27.899Z"
+  },
+  {
+    "teilnehmerName": "Laslo",
+    "turnierId": "australian-open-2026",
+    "herren": [
+      "h1",
+      "h2",
+      "h4",
+      "h6",
+      "h9",
+      "h96",
+      "h125",
+      "h11"
+    ],
+    "damen": [
+      "d1",
+      "d2",
+      "d29",
+      "d68",
+      "d85",
+      "d98",
+      "d12",
+      "d4"
+    ],
+    "siegerHerren": "h2",
+    "siegerDamen": "d4",
+    "abgegebenAm": "2026-01-25T16:20:44.789Z"
+  },
+  {
+    "teilnehmerName": "Malte",
+    "turnierId": "australian-open-2026",
+    "herren": [
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h19",
+      "h96",
+      "h108",
+      "h11"
+    ],
+    "damen": [
+      "d1",
+      "d2",
+      "d3",
+      "d4",
+      "d7",
+      "d12",
+      "d13",
+      "d70"
+    ],
+    "siegerHerren": "h2",
+    "siegerDamen": "d1",
+    "abgegebenAm": "2026-01-25T16:23:16.339Z"
+  },
+  {
+    "teilnehmerName": "Melissa",
+    "turnierId": "australian-open-2026",
+    "herren": [
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h10",
+      "h96",
+      "h113",
+      "h11"
+    ],
+    "damen": [
+      "d1",
+      "d4",
+      "d12",
+      "d62",
+      "d85",
+      "d96",
+      "d18",
+      "d117"
+    ],
+    "siegerHerren": "h2",
+    "siegerDamen": "d1",
+    "abgegebenAm": "2026-01-25T16:25:18.810Z"
+  },
+  {
+    "teilnehmerName": "Philipp",
+    "turnierId": "australian-open-2026",
+    "herren": [
+      "h1",
+      "h2",
+      "h4",
+      "h16",
+      "h17",
+      "h60",
+      "h11",
+      "h114"
+    ],
+    "damen": [
+      "d1",
+      "d3",
+      "d4",
+      "d5",
+      "d70",
+      "d85",
+      "d91",
+      "d98"
+    ],
+    "siegerHerren": "h1",
+    "siegerDamen": "d1",
+    "abgegebenAm": "2026-01-25T16:26:26.606Z"
+  },
+  {
+    "teilnehmerName": "Robin",
+    "turnierId": "australian-open-2026",
+    "herren": [
+      "h1",
+      "h2",
+      "h4",
+      "h7",
+      "h9",
+      "h10",
+      "h96",
+      "h120"
+    ],
+    "damen": [
+      "d1",
+      "d2",
+      "d3",
+      "d4",
+      "d12",
+      "d13",
+      "d98",
+      "d102"
+    ],
+    "siegerHerren": "h2",
+    "siegerDamen": "d1",
+    "abgegebenAm": "2026-01-25T16:27:19.175Z"
+  },
+  {
+    "teilnehmerName": "Roland",
+    "turnierId": "australian-open-2026",
+    "herren": [
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h9",
+      "h12",
+      "h37",
+      "h96"
+    ],
+    "damen": [
+      "d1",
+      "d5",
+      "d13",
+      "d26",
+      "d37",
+      "d79",
+      "d89",
+      "d4"
+    ],
+    "siegerHerren": "h1",
+    "siegerDamen": "d4",
+    "abgegebenAm": "2026-01-25T16:28:13.114Z"
+  },
+  {
+    "teilnehmerName": "Sebastian",
+    "turnierId": "australian-open-2026",
+    "herren": [
+      "h1",
+      "h2",
+      "h4",
+      "h5",
+      "h13",
+      "h96",
+      "h114",
+      "h11"
+    ],
+    "damen": [
+      "d1",
+      "d2",
+      "d4",
+      "d85",
+      "d99",
+      "d105",
+      "d116",
+      "d26"
+    ],
+    "siegerHerren": "h2",
+    "siegerDamen": "d1",
+    "abgegebenAm": "2026-01-25T16:29:11.158Z"
+  }
+]
