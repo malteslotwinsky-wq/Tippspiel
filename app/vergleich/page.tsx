@@ -17,8 +17,8 @@ export default function VergleichPage() {
     const [tipps, setTipps] = useState<Tipp[]>([]);
     const [ergebnisse, setErgebnisse] = useState<TurnierErgebnis[]>([]);
 
-    const [teilnehmerA, setTeilnehmerA] = useState<string>('');
-    const [teilnehmerB, setTeilnehmerB] = useState<string>('');
+    // Dynamic array of selected participants
+    const [selectedTeilnehmer, setSelectedTeilnehmer] = useState<string[]>(['', '']);
 
     useEffect(() => {
         async function loadData() {
@@ -59,9 +59,6 @@ export default function VergleichPage() {
         loadData();
     }, []);
 
-    const tippA = tipps.find(t => t.teilnehmerName === teilnehmerA);
-    const tippB = tipps.find(t => t.teilnehmerName === teilnehmerB);
-
     function getSpielerInfo(id: string) {
         if (!spieler) return { name: id, ranking: 0 };
         const alleSpieler = [...spieler.herren, ...spieler.damen];
@@ -89,10 +86,29 @@ export default function VergleichPage() {
         }, 0);
     }
 
-    function isGemeinsam(id: string, andererTipp: Tipp | undefined, kategorie: 'herren' | 'damen') {
-        if (!andererTipp) return false;
-        return andererTipp[kategorie].includes(id);
+    function isGemeinsam(id: string, otherTipps: (Tipp | undefined)[], kategorie: 'herren' | 'damen') {
+        return otherTipps.filter(t => t).some(t => t![kategorie].includes(id));
     }
+
+    function addTeilnehmer() {
+        setSelectedTeilnehmer([...selectedTeilnehmer, '']);
+    }
+
+    function removeTeilnehmer(index: number) {
+        if (selectedTeilnehmer.length > 2) {
+            setSelectedTeilnehmer(selectedTeilnehmer.filter((_, i) => i !== index));
+        }
+    }
+
+    function updateTeilnehmer(index: number, value: string) {
+        const updated = [...selectedTeilnehmer];
+        updated[index] = value;
+        setSelectedTeilnehmer(updated);
+    }
+
+    const selectedTipps = selectedTeilnehmer.map(name => tipps.find(t => t.teilnehmerName === name));
+    const hasValidSelection = selectedTeilnehmer.filter(n => n).length >= 2;
+    const allTippsExist = selectedTeilnehmer.filter(n => n).every(name => tipps.find(t => t.teilnehmerName === name));
 
     if (loading) {
         return (
@@ -124,6 +140,11 @@ export default function VergleichPage() {
         tipps.some(tipp => tipp.teilnehmerName === t.name)
     );
 
+    // Grid columns based on number of participants
+    const gridCols = selectedTeilnehmer.length === 2 ? 'md:grid-cols-2' :
+        selectedTeilnehmer.length === 3 ? 'md:grid-cols-3' :
+            'md:grid-cols-2 lg:grid-cols-4';
+
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -137,231 +158,173 @@ export default function VergleichPage() {
 
             {/* Selector */}
             <Card>
-                <div className="flex flex-col sm:flex-row items-center gap-4">
-                    <div className="flex-1 w-full">
-                        <label className="label">Teilnehmer 1</label>
-                        <select
-                            value={teilnehmerA}
-                            onChange={(e) => setTeilnehmerA(e.target.value)}
-                            className="input"
-                        >
-                            <option value="">Auswählen...</option>
-                            {teilnehmerMitTipps.map(t => (
-                                <option key={t.name} value={t.name}>{t.name}</option>
-                            ))}
-                        </select>
+                <div className="space-y-4">
+                    <div className={`grid gap-4 ${gridCols}`}>
+                        {selectedTeilnehmer.map((selected, index) => (
+                            <div key={index} className="relative">
+                                <label className="label">Teilnehmer {index + 1}</label>
+                                <div className="flex gap-2">
+                                    <select
+                                        value={selected}
+                                        onChange={(e) => updateTeilnehmer(index, e.target.value)}
+                                        className="input flex-1"
+                                    >
+                                        <option value="">Auswählen...</option>
+                                        {teilnehmerMitTipps.map(t => (
+                                            <option key={t.name} value={t.name}>{t.name}</option>
+                                        ))}
+                                    </select>
+                                    {selectedTeilnehmer.length > 2 && (
+                                        <button
+                                            onClick={() => removeTeilnehmer(index)}
+                                            className="btn-ghost btn-sm text-red-500 hover:text-red-600 hover:bg-red-50 px-2"
+                                            title="Entfernen"
+                                        >
+                                            ✕
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
                     </div>
 
-                    <div className="text-2xl font-bold text-slate-300 hidden sm:block">vs</div>
-
-                    <div className="flex-1 w-full">
-                        <label className="label">Teilnehmer 2</label>
-                        <select
-                            value={teilnehmerB}
-                            onChange={(e) => setTeilnehmerB(e.target.value)}
-                            className="input"
-                        >
-                            <option value="">Auswählen...</option>
-                            {teilnehmerMitTipps.map(t => (
-                                <option key={t.name} value={t.name}>{t.name}</option>
-                            ))}
-                        </select>
-                    </div>
+                    {/* Add more button */}
+                    <button
+                        onClick={addTeilnehmer}
+                        className="btn-secondary btn-sm w-full sm:w-auto"
+                    >
+                        <span className="mr-2">+</span>
+                        Weiteren Teilnehmer hinzufügen
+                    </button>
                 </div>
             </Card>
 
             {/* Comparison */}
-            {tippA && tippB && (
+            {hasValidSelection && allTippsExist && (
                 <div className="space-y-6">
                     {/* Herren */}
                     <section>
                         <h2 className="section-header">Herren</h2>
-                        <div className="grid md:grid-cols-2 gap-4">
-                            {/* Teilnehmer A - Herren */}
-                            <Card
-                                title={teilnehmerA}
-                                subtitle={`${berechneKategoriePunkte(tippA.herren).toFixed(1)} Punkte`}
-                            >
-                                <div className="space-y-2">
-                                    {tippA.herren.map(id => {
-                                        const info = getSpielerInfo(id);
-                                        const status = getSpielerStatus(id);
-                                        const gemeinsam = isGemeinsam(id, tippB, 'herren');
-                                        const isSieger = id === tippA.siegerHerren;
+                        <div className={`grid gap-4 ${gridCols}`}>
+                            {selectedTeilnehmer.map((name, index) => {
+                                const tipp = selectedTipps[index];
+                                if (!name || !tipp) return null;
 
-                                        return (
-                                            <div
-                                                key={id}
-                                                className={`p-3 rounded-lg flex items-center justify-between text-sm ${gemeinsam ? 'bg-blue-50 border border-blue-200' :
-                                                    status.nochDabei ? 'bg-emerald-50 border border-emerald-100' :
-                                                        'bg-slate-50 border border-slate-100'
-                                                    }`}
-                                            >
-                                                <div className="flex items-center gap-2 min-w-0">
-                                                    {gemeinsam && <span className="text-blue-500 text-xs">●</span>}
-                                                    <span className="text-slate-400 text-xs w-5">{info.ranking}</span>
-                                                    <span className={`truncate ${status.nochDabei ? 'font-medium' : 'text-slate-500'}`}>
-                                                        {info.name}
-                                                    </span>
-                                                    {isSieger && <span className="text-amber-500">★</span>}
-                                                </div>
-                                                <div className="flex-shrink-0 ml-2">
-                                                    {status.nochDabei ? (
-                                                        <span className="badge badge-green text-xs">
-                                                            {status.rundenName || 'Dabei'}
-                                                        </span>
-                                                    ) : (
-                                                        <span className="badge badge-gray text-xs">
-                                                            Out {status.rundenName}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </Card>
+                                const otherTipps = selectedTipps.filter((_, i) => i !== index);
 
-                            {/* Teilnehmer B - Herren */}
-                            <Card
-                                title={teilnehmerB}
-                                subtitle={`${berechneKategoriePunkte(tippB.herren).toFixed(1)} Punkte`}
-                            >
-                                <div className="space-y-2">
-                                    {tippB.herren.map(id => {
-                                        const info = getSpielerInfo(id);
-                                        const status = getSpielerStatus(id);
-                                        const gemeinsam = isGemeinsam(id, tippA, 'herren');
-                                        const isSieger = id === tippB.siegerHerren;
+                                return (
+                                    <Card
+                                        key={`herren-${index}`}
+                                        title={name}
+                                        subtitle={`${berechneKategoriePunkte(tipp.herren).toFixed(1)} Punkte`}
+                                    >
+                                        <div className="space-y-2">
+                                            {tipp.herren.map(id => {
+                                                const info = getSpielerInfo(id);
+                                                const status = getSpielerStatus(id);
+                                                const gemeinsam = isGemeinsam(id, otherTipps, 'herren');
+                                                const isSieger = id === tipp.siegerHerren;
 
-                                        return (
-                                            <div
-                                                key={id}
-                                                className={`p-3 rounded-lg flex items-center justify-between text-sm ${gemeinsam ? 'bg-blue-50 border border-blue-200' :
-                                                    status.nochDabei ? 'bg-emerald-50 border border-emerald-100' :
-                                                        'bg-slate-50 border border-slate-100'
-                                                    }`}
-                                            >
-                                                <div className="flex items-center gap-2 min-w-0">
-                                                    {gemeinsam && <span className="text-blue-500 text-xs">●</span>}
-                                                    <span className="text-slate-400 text-xs w-5">{info.ranking}</span>
-                                                    <span className={`truncate ${status.nochDabei ? 'font-medium' : 'text-slate-500'}`}>
-                                                        {info.name}
-                                                    </span>
-                                                    {isSieger && <span className="text-amber-500">★</span>}
-                                                </div>
-                                                <div className="flex-shrink-0 ml-2">
-                                                    {status.nochDabei ? (
-                                                        <span className="badge badge-green text-xs">
-                                                            {status.rundenName || 'Dabei'}
-                                                        </span>
-                                                    ) : (
-                                                        <span className="badge badge-gray text-xs">
-                                                            Out {status.rundenName}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </Card>
+                                                return (
+                                                    <div
+                                                        key={id}
+                                                        className={`p-2.5 rounded-lg flex items-center justify-between text-sm ${gemeinsam ? 'bg-blue-50 border border-blue-200' :
+                                                                status.nochDabei ? 'bg-emerald-50 border border-emerald-100' :
+                                                                    'bg-slate-50 border border-slate-100'
+                                                            }`}
+                                                    >
+                                                        <div className="flex items-center gap-1.5 min-w-0">
+                                                            {gemeinsam && <span className="text-blue-500 text-xs">●</span>}
+                                                            <span className="text-slate-400 text-xs w-4">{info.ranking}</span>
+                                                            <span className={`truncate ${status.nochDabei ? 'font-medium' : 'text-slate-500'}`}>
+                                                                {info.name}
+                                                            </span>
+                                                            {isSieger && <span className="text-amber-500 text-sm">★</span>}
+                                                        </div>
+                                                        <div className="flex items-center gap-1.5 flex-shrink-0 ml-1">
+                                                            <span className={`font-semibold text-xs tabular-nums ${status.punkte > 0 ? 'text-emerald-600' : 'text-slate-400'}`}>
+                                                                {status.punkte.toFixed(1)}
+                                                            </span>
+                                                            {status.nochDabei ? (
+                                                                <span className="badge badge-green text-xs">
+                                                                    {status.rundenName || 'Dabei'}
+                                                                </span>
+                                                            ) : (
+                                                                <span className="badge badge-gray text-xs">
+                                                                    Out
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </Card>
+                                );
+                            })}
                         </div>
                     </section>
 
                     {/* Damen */}
                     <section>
                         <h2 className="section-header">Damen</h2>
-                        <div className="grid md:grid-cols-2 gap-4">
-                            {/* Teilnehmer A - Damen */}
-                            <Card
-                                title={teilnehmerA}
-                                subtitle={`${berechneKategoriePunkte(tippA.damen).toFixed(1)} Punkte`}
-                            >
-                                <div className="space-y-2">
-                                    {tippA.damen.map(id => {
-                                        const info = getSpielerInfo(id);
-                                        const status = getSpielerStatus(id);
-                                        const gemeinsam = isGemeinsam(id, tippB, 'damen');
-                                        const isSieger = id === tippA.siegerDamen;
+                        <div className={`grid gap-4 ${gridCols}`}>
+                            {selectedTeilnehmer.map((name, index) => {
+                                const tipp = selectedTipps[index];
+                                if (!name || !tipp) return null;
 
-                                        return (
-                                            <div
-                                                key={id}
-                                                className={`p-3 rounded-lg flex items-center justify-between text-sm ${gemeinsam ? 'bg-blue-50 border border-blue-200' :
-                                                    status.nochDabei ? 'bg-emerald-50 border border-emerald-100' :
-                                                        'bg-slate-50 border border-slate-100'
-                                                    }`}
-                                            >
-                                                <div className="flex items-center gap-2 min-w-0">
-                                                    {gemeinsam && <span className="text-blue-500 text-xs">●</span>}
-                                                    <span className="text-slate-400 text-xs w-5">{info.ranking}</span>
-                                                    <span className={`truncate ${status.nochDabei ? 'font-medium' : 'text-slate-500'}`}>
-                                                        {info.name}
-                                                    </span>
-                                                    {isSieger && <span className="text-amber-500">★</span>}
-                                                </div>
-                                                <div className="flex-shrink-0 ml-2">
-                                                    {status.nochDabei ? (
-                                                        <span className="badge badge-green text-xs">
-                                                            {status.rundenName || 'Dabei'}
-                                                        </span>
-                                                    ) : (
-                                                        <span className="badge badge-gray text-xs">
-                                                            Out {status.rundenName}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </Card>
+                                const otherTipps = selectedTipps.filter((_, i) => i !== index);
 
-                            {/* Teilnehmer B - Damen */}
-                            <Card
-                                title={teilnehmerB}
-                                subtitle={`${berechneKategoriePunkte(tippB.damen).toFixed(1)} Punkte`}
-                            >
-                                <div className="space-y-2">
-                                    {tippB.damen.map(id => {
-                                        const info = getSpielerInfo(id);
-                                        const status = getSpielerStatus(id);
-                                        const gemeinsam = isGemeinsam(id, tippA, 'damen');
-                                        const isSieger = id === tippB.siegerDamen;
+                                return (
+                                    <Card
+                                        key={`damen-${index}`}
+                                        title={name}
+                                        subtitle={`${berechneKategoriePunkte(tipp.damen).toFixed(1)} Punkte`}
+                                    >
+                                        <div className="space-y-2">
+                                            {tipp.damen.map(id => {
+                                                const info = getSpielerInfo(id);
+                                                const status = getSpielerStatus(id);
+                                                const gemeinsam = isGemeinsam(id, otherTipps, 'damen');
+                                                const isSieger = id === tipp.siegerDamen;
 
-                                        return (
-                                            <div
-                                                key={id}
-                                                className={`p-3 rounded-lg flex items-center justify-between text-sm ${gemeinsam ? 'bg-blue-50 border border-blue-200' :
-                                                    status.nochDabei ? 'bg-emerald-50 border border-emerald-100' :
-                                                        'bg-slate-50 border border-slate-100'
-                                                    }`}
-                                            >
-                                                <div className="flex items-center gap-2 min-w-0">
-                                                    {gemeinsam && <span className="text-blue-500 text-xs">●</span>}
-                                                    <span className="text-slate-400 text-xs w-5">{info.ranking}</span>
-                                                    <span className={`truncate ${status.nochDabei ? 'font-medium' : 'text-slate-500'}`}>
-                                                        {info.name}
-                                                    </span>
-                                                    {isSieger && <span className="text-amber-500">★</span>}
-                                                </div>
-                                                <div className="flex-shrink-0 ml-2">
-                                                    {status.nochDabei ? (
-                                                        <span className="badge badge-green text-xs">
-                                                            {status.rundenName || 'Dabei'}
-                                                        </span>
-                                                    ) : (
-                                                        <span className="badge badge-gray text-xs">
-                                                            Out {status.rundenName}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </Card>
+                                                return (
+                                                    <div
+                                                        key={id}
+                                                        className={`p-2.5 rounded-lg flex items-center justify-between text-sm ${gemeinsam ? 'bg-blue-50 border border-blue-200' :
+                                                                status.nochDabei ? 'bg-emerald-50 border border-emerald-100' :
+                                                                    'bg-slate-50 border border-slate-100'
+                                                            }`}
+                                                    >
+                                                        <div className="flex items-center gap-1.5 min-w-0">
+                                                            {gemeinsam && <span className="text-blue-500 text-xs">●</span>}
+                                                            <span className="text-slate-400 text-xs w-4">{info.ranking}</span>
+                                                            <span className={`truncate ${status.nochDabei ? 'font-medium' : 'text-slate-500'}`}>
+                                                                {info.name}
+                                                            </span>
+                                                            {isSieger && <span className="text-amber-500 text-sm">★</span>}
+                                                        </div>
+                                                        <div className="flex items-center gap-1.5 flex-shrink-0 ml-1">
+                                                            <span className={`font-semibold text-xs tabular-nums ${status.punkte > 0 ? 'text-emerald-600' : 'text-slate-400'}`}>
+                                                                {status.punkte.toFixed(1)}
+                                                            </span>
+                                                            {status.nochDabei ? (
+                                                                <span className="badge badge-green text-xs">
+                                                                    {status.rundenName || 'Dabei'}
+                                                                </span>
+                                                            ) : (
+                                                                <span className="badge badge-gray text-xs">
+                                                                    Out
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </Card>
+                                );
+                            })}
                         </div>
                     </section>
 
@@ -375,29 +338,31 @@ export default function VergleichPage() {
                             <span className="text-amber-500">★</span>
                             <span>Siegertipp</span>
                         </div>
+                        <div className="flex items-center gap-2">
+                            <span className="font-semibold text-emerald-600">4.0</span>
+                            <span>Punkte</span>
+                        </div>
                     </div>
                 </div>
             )}
 
             {/* No selection */}
-            {(!teilnehmerA || !teilnehmerB) && (
+            {!hasValidSelection && (
                 <Card>
                     <div className="empty-state">
                         <p className="empty-state-text">
-                            Wähle zwei Teilnehmer aus, um ihre Tipps zu vergleichen.
+                            Wähle mindestens zwei Teilnehmer aus, um ihre Tipps zu vergleichen.
                         </p>
                     </div>
                 </Card>
             )}
 
             {/* Missing tips */}
-            {teilnehmerA && teilnehmerB && (!tippA || !tippB) && (
+            {hasValidSelection && !allTippsExist && (
                 <Card>
                     <div className="empty-state">
                         <p className="empty-state-text">
-                            {!tippA && `${teilnehmerA} hat keinen Tipp abgegeben.`}
-                            {!tippA && !tippB && ' '}
-                            {!tippB && `${teilnehmerB} hat keinen Tipp abgegeben.`}
+                            Einer oder mehrere Teilnehmer haben keinen Tipp abgegeben.
                         </p>
                     </div>
                 </Card>

@@ -1,6 +1,24 @@
 [
   {
     "turnierId": "australian-open-2026",
+    "spielerId": "h1",
+    "runde": 6,
+    "out": false
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "h2",
+    "runde": 6,
+    "out": false
+  },
+  {
+    "turnierId": "australian-open-2026",
+    "spielerId": "d1",
+    "runde": 6,
+    "out": false
+  },
+  {
+    "turnierId": "australian-open-2026",
     "spielerId": "h16",
     "runde": 4,
     "out": true
