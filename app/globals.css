@@ -2,34 +2,115 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  @apply bg-gray-100 min-h-screen;
-}
+/* Design System Base */
+@layer base {
+  :root {
+    --safe-area-top: env(safe-area-inset-top, 0px);
+    --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  }
 
-/* Mobile-friendly touch targets */
-@layer utilities {
-  .touch-target {
-    @apply min-h-[44px] min-w-[44px];
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-gradient-to-br from-slate-50 via-white to-slate-100 text-slate-900 min-h-screen;
+  }
+
+  /* Prevent horizontal scroll on mobile */
+  html,
+  body {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  /* Better tap highlighting on mobile */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Prevent zoom on iOS inputs */
+  input,
+  select,
+  textarea {
+    font-size: 16px;
   }
 }
 
-/* Prevent horizontal scroll on mobile */
-html, body {
-  overflow-x: hidden;
-  width: 100%;
+/* Component Layer */
+@layer components {
+
+  /* Primary Button */
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 bg-green-600 text-white font-semibold text-sm rounded-xl shadow-sm transition-all duration-200 ease-out hover:bg-green-700 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0;
+  }
+
+  /* Secondary Button */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-6 py-3 bg-white text-slate-900 font-semibold text-sm rounded-xl border border-slate-200 shadow-sm transition-all duration-200 ease-out hover:bg-slate-50 hover:border-slate-300 hover:shadow active:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2;
+  }
+
+  /* Ghost Button */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center px-4 py-2 text-slate-600 font-medium text-sm rounded-lg transition-all duration-150 hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2;
+  }
+
+  /* Card Component */
+  .card {
+    @apply bg-white rounded-2xl border border-slate-200 shadow-sm;
+  }
+
+  .card-header {
+    @apply px-5 py-4 border-b border-slate-200;
+  }
+
+  .card-body {
+    @apply p-5;
+  }
+
+  /* Section Container */
+  .section {
+    @apply max-w-4xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Page Container */
+  .page-container {
+    @apply pt-6 pb-12 sm:pt-8 sm:pb-16;
+    padding-top: calc(1.5rem + var(--safe-area-top));
+    padding-bottom: calc(3rem + var(--safe-area-bottom));
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium;
+  }
+
+  .badge-primary {
+    @apply bg-green-100 text-green-700;
+  }
+
+  .badge-secondary {
+    @apply bg-slate-100 text-slate-700;
+  }
 }
 
-/* Better mobile form inputs */
-input, select, textarea, button {
-  font-size: 16px; /* Prevents zoom on iOS */
-}
+/* Utility Layer */
+@layer utilities {
 
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
-}
+  /* Touch target minimum size */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
 
-/* Better tap highlighting on mobile */
-* {
-  -webkit-tap-highlight-color: rgba(0, 128, 0, 0.1);
+  /* Focus ring utility */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2;
+  }
+
+  /* Glass effect */
+  .glass {
+    @apply bg-white/80 backdrop-blur-lg;
+  }
 }

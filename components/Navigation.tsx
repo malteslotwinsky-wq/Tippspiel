@@ -16,13 +16,11 @@ export default function Navigation() {
   useEffect(() => {
     const supabase = createClientSupabase();
 
-    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
@@ -30,10 +28,25 @@ export default function Navigation() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Close menu when route changes
   useEffect(() => {
     setMenuOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenuOpen(false);
+    };
+    if (menuOpen) {
+      document.addEventListener('keydown', handleEsc);
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.removeEventListener('keydown', handleEsc);
+      document.body.style.overflow = '';
+    };
+  }, [menuOpen]);
 
   const handleLogout = async () => {
     try {
@@ -46,13 +59,11 @@ export default function Navigation() {
     }
   };
 
-  // Public links (always visible)
   const publicLinks = [
     { href: '/', label: 'Start' },
     { href: '/rangliste', label: 'Rangliste' },
   ];
 
-  // Protected links (only visible when logged in)
   const protectedLinks = [
     { href: '/teilnehmer', label: 'Teilnehmer' },
     { href: '/tipps', label: 'Alle Tipps' },
@@ -61,105 +72,149 @@ export default function Navigation() {
 
   const visibleLinks = user ? [...publicLinks, ...protectedLinks] : publicLinks;
 
+  const NavLink = ({ href, label, mobile = false }: { href: string; label: string; mobile?: boolean }) => {
+    const isActive = pathname === href;
+
+    if (mobile) {
+      return (
+        <Link
+          href={href}
+          className={`block px-4 py-3 rounded-xl text-base font-medium transition-all duration-150 touch-target
+            ${isActive
+              ? 'bg-green-50 text-green-700'
+              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+            }`}
+        >
+          {label}
+        </Link>
+      );
+    }
+
+    return (
+      <Link
+        href={href}
+        className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 focus-ring
+          ${isActive
+            ? 'bg-green-600 text-white'
+            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+          }`}
+      >
+        {label}
+      </Link>
+    );
+  };
+
   return (
-    <nav className="bg-green-700 text-white shadow-lg">
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="flex items-center justify-between h-14 md:h-16">
-          {/* Logo */}
-          <Link href="/" className="font-bold text-lg md:text-xl">
-            🎾 Tennis Tippspiel
-          </Link>
+    <>
+      {/* Header */}
+      <header className="sticky top-0 z-50 glass border-b border-slate-200/50">
+        <div className="section">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <Link
+              href="/"
+              className="flex items-center gap-2 font-semibold text-lg text-slate-900 hover:text-green-600 transition-colors focus-ring rounded-lg px-2 py-1 -ml-2"
+            >
+              <span className="text-2xl">🎾</span>
+              <span className="hidden sm:inline">Tennis Tippspiel</span>
+            </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-4">
-            {visibleLinks.map(link => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${pathname === link.href
-                    ? 'bg-green-800'
-                    : 'hover:bg-green-600'
-                  }`}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center gap-1">
+              {visibleLinks.map(link => (
+                <NavLink key={link.href} {...link} />
+              ))}
 
-            {!loading && (
-              <>
-                {user ? (
-                  <button
-                    onClick={handleLogout}
-                    className="px-3 py-2 rounded-md text-sm font-medium bg-red-600 hover:bg-red-700 transition-colors"
-                  >
-                    Logout
-                  </button>
-                ) : (
-                  <Link
-                    href="/login"
-                    className="px-3 py-2 rounded-md text-sm font-medium bg-green-800 hover:bg-green-900 transition-colors"
-                  >
-                    Admin Login
-                  </Link>
-                )}
-              </>
-            )}
-          </div>
-
-          {/* Mobile Hamburger Button */}
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden p-2 rounded-md hover:bg-green-600 transition-colors"
-            aria-label="Menü öffnen"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              {menuOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              {!loading && (
+                <div className="ml-3 pl-3 border-l border-slate-200">
+                  {user ? (
+                    <button
+                      onClick={handleLogout}
+                      className="btn-ghost text-red-600 hover:bg-red-50 hover:text-red-700"
+                    >
+                      Logout
+                    </button>
+                  ) : (
+                    <Link href="/login" className="btn-primary text-sm py-2">
+                      Admin Login
+                    </Link>
+                  )}
+                </div>
               )}
-            </svg>
-          </button>
-        </div>
+            </nav>
 
-        {/* Mobile Menu */}
-        {menuOpen && (
-          <div className="md:hidden pb-4 space-y-2">
-            {visibleLinks.map(link => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${pathname === link.href
-                    ? 'bg-green-800'
-                    : 'hover:bg-green-600'
-                  }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-
-            {!loading && (
-              <>
-                {user ? (
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-3 py-2 rounded-md text-base font-medium bg-red-600 hover:bg-red-700 transition-colors"
-                  >
-                    Logout
-                  </button>
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="md:hidden p-2 -mr-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors focus-ring touch-target"
+              aria-label={menuOpen ? 'Menü schließen' : 'Menü öffnen'}
+              aria-expanded={menuOpen}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {menuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 ) : (
-                  <Link
-                    href="/login"
-                    className="block px-3 py-2 rounded-md text-base font-medium bg-green-800 hover:bg-green-900 transition-colors"
-                  >
-                    Admin Login
-                  </Link>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 )}
-              </>
-            )}
+              </svg>
+            </button>
           </div>
-        )}
-      </div>
-    </nav>
+        </div>
+      </header>
+
+      {/* Mobile Menu Overlay */}
+      {menuOpen && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden"
+            onClick={() => setMenuOpen(false)}
+            aria-hidden="true"
+          />
+
+          <div className="fixed top-0 right-0 bottom-0 w-[280px] max-w-[85vw] bg-white shadow-xl z-50 md:hidden">
+            <div className="flex flex-col h-full">
+              <div className="flex items-center justify-between px-4 h-16 border-b border-slate-200">
+                <span className="font-semibold text-slate-900">Menü</span>
+                <button
+                  onClick={() => setMenuOpen(false)}
+                  className="p-2 -mr-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors focus-ring touch-target"
+                  aria-label="Menü schließen"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <nav className="flex-1 overflow-y-auto p-4 space-y-1">
+                {visibleLinks.map(link => (
+                  <NavLink key={link.href} {...link} mobile />
+                ))}
+              </nav>
+
+              {!loading && (
+                <div className="p-4 border-t border-slate-200">
+                  {user ? (
+                    <button
+                      onClick={handleLogout}
+                      className="w-full px-4 py-3 rounded-xl text-base font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors touch-target"
+                    >
+                      Logout
+                    </button>
+                  ) : (
+                    <Link
+                      href="/login"
+                      className="block w-full px-4 py-3 rounded-xl text-base font-medium text-center text-white bg-green-600 hover:bg-green-700 transition-colors touch-target"
+                    >
+                      Admin Login
+                    </Link>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+    </>
   );
 }
