@@ -59,6 +59,7 @@ export default function Navigation() {
   const publicLinks = [
     { href: '/', label: 'Start' },
     { href: '/rangliste', label: 'Rangliste' },
+    { href: '/vergleich', label: 'Vergleich' },
   ];
 
   const protectedLinks = [
