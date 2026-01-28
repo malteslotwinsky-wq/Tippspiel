@@ -15,12 +15,12 @@ export default async function HomePage() {
     : [];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 md:space-y-8">
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
+        <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2 md:mb-4">
           Tennis Grand Slam Tippspiel
         </h1>
-        <p className="text-lg text-gray-600">
+        <p className="text-base md:text-lg text-gray-600">
           Tippe auf deine Favoriten und gewinne!
         </p>
       </div>
@@ -28,22 +28,22 @@ export default async function HomePage() {
       {aktivTurnier && (
         <Card title="Aktuelles Turnier">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-green-700 mb-2">
+            <h2 className="text-xl md:text-2xl font-bold text-green-700 mb-2">
               {aktivTurnier.name} {aktivTurnier.jahr}
             </h2>
             <p className="text-gray-600 mb-4">
               {tippsFuerAktiv.length} von {teilnehmer.length} Tipps abgegeben
             </p>
-            <div className="flex justify-center gap-4">
+            <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
               <Link
                 href="/teilnehmer"
-                className="bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors"
+                className="bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors text-center"
               >
                 Tipp abgeben
               </Link>
               <Link
                 href="/rangliste"
-                className="bg-gray-200 text-gray-800 px-6 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+                className="bg-gray-200 text-gray-800 px-6 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors text-center"
               >
                 Rangliste
               </Link>

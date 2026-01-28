@@ -3,5 +3,33 @@
 @tailwind utilities;
 
 body {
-  @apply bg-gray-100;
+  @apply bg-gray-100 min-h-screen;
+}
+
+/* Mobile-friendly touch targets */
+@layer utilities {
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+}
+
+/* Prevent horizontal scroll on mobile */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Better mobile form inputs */
+input, select, textarea, button {
+  font-size: 16px; /* Prevents zoom on iOS */
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Better tap highlighting on mobile */
+* {
+  -webkit-tap-highlight-color: rgba(0, 128, 0, 0.1);
 }
