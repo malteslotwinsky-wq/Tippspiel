@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Card from '@/components/ui/Card';
 import { Spieler, Turnier, Tipp, TurnierErgebnis, RUNDEN_NAMEN, Runde, PUNKTE_PRO_RUNDE } from '@/lib/types';
@@ -11,7 +10,6 @@ interface TeilnehmerOption {
 }
 
 export default function VergleichPage() {
-    const searchParams = useSearchParams();
     const [loading, setLoading] = useState(true);
     const [turnier, setTurnier] = useState<Turnier | null>(null);
     const [teilnehmerListe, setTeilnehmerListe] = useState<TeilnehmerOption[]>([]);
@@ -19,8 +17,8 @@ export default function VergleichPage() {
     const [tipps, setTipps] = useState<Tipp[]>([]);
     const [ergebnisse, setErgebnisse] = useState<TurnierErgebnis[]>([]);
 
-    const [teilnehmerA, setTeilnehmerA] = useState<string>(searchParams.get('a') || '');
-    const [teilnehmerB, setTeilnehmerB] = useState<string>(searchParams.get('b') || '');
+    const [teilnehmerA, setTeilnehmerA] = useState<string>('');
+    const [teilnehmerB, setTeilnehmerB] = useState<string>('');
 
     useEffect(() => {
         async function loadData() {
@@ -195,8 +193,8 @@ export default function VergleichPage() {
                                             <div
                                                 key={id}
                                                 className={`p-3 rounded-lg flex items-center justify-between text-sm ${gemeinsam ? 'bg-blue-50 border border-blue-200' :
-                                                        status.nochDabei ? 'bg-emerald-50 border border-emerald-100' :
-                                                            'bg-slate-50 border border-slate-100'
+                                                    status.nochDabei ? 'bg-emerald-50 border border-emerald-100' :
+                                                        'bg-slate-50 border border-slate-100'
                                                     }`}
                                             >
                                                 <div className="flex items-center gap-2 min-w-0">
@@ -240,8 +238,8 @@ export default function VergleichPage() {
                                             <div
                                                 key={id}
                                                 className={`p-3 rounded-lg flex items-center justify-between text-sm ${gemeinsam ? 'bg-blue-50 border border-blue-200' :
-                                                        status.nochDabei ? 'bg-emerald-50 border border-emerald-100' :
-                                                            'bg-slate-50 border border-slate-100'
+                                                    status.nochDabei ? 'bg-emerald-50 border border-emerald-100' :
+                                                        'bg-slate-50 border border-slate-100'
                                                     }`}
                                             >
                                                 <div className="flex items-center gap-2 min-w-0">
@@ -291,8 +289,8 @@ export default function VergleichPage() {
                                             <div
                                                 key={id}
                                                 className={`p-3 rounded-lg flex items-center justify-between text-sm ${gemeinsam ? 'bg-blue-50 border border-blue-200' :
-                                                        status.nochDabei ? 'bg-emerald-50 border border-emerald-100' :
-                                                            'bg-slate-50 border border-slate-100'
+                                                    status.nochDabei ? 'bg-emerald-50 border border-emerald-100' :
+                                                        'bg-slate-50 border border-slate-100'
                                                     }`}
                                             >
                                                 <div className="flex items-center gap-2 min-w-0">
@@ -336,8 +334,8 @@ export default function VergleichPage() {
                                             <div
                                                 key={id}
                                                 className={`p-3 rounded-lg flex items-center justify-between text-sm ${gemeinsam ? 'bg-blue-50 border border-blue-200' :
-                                                        status.nochDabei ? 'bg-emerald-50 border border-emerald-100' :
-                                                            'bg-slate-50 border border-slate-100'
+                                                    status.nochDabei ? 'bg-emerald-50 border border-emerald-100' :
+                                                        'bg-slate-50 border border-slate-100'
                                                     }`}
                                             >
                                                 <div className="flex items-center gap-2 min-w-0">
