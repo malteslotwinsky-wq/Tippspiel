@@ -59,23 +59,67 @@ export default function AdminTurnierPage() {
     setSaving(true);
     setMessage(null);
 
-    const res = await fetch('/api/turnier', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...newTurnierData,
-        abgabeSchluss: newTurnierData.abgabeSchluss ? new Date(newTurnierData.abgabeSchluss).toISOString() : undefined,
-      }),
-    });
+    try {
+      // Create tournament
+      const res = await fetch('/api/turnier', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newTurnierData.name,
+          jahr: newTurnierData.jahr,
+          abgabeSchluss: newTurnierData.abgabeSchluss ? new Date(newTurnierData.abgabeSchluss).toISOString() : undefined,
+        }),
+      });
 
-    if (res.ok) {
-      setMessage({ type: 'success', text: 'Turnier erstellt' });
+      if (!res.ok) {
+        const data = await res.json();
+        setMessage({ type: 'error', text: data.error });
+        setSaving(false);
+        return;
+      }
+
+      // Import Herren if CSV provided
+      const herrenCsv = (newTurnierData as any).herrenCsv;
+      if (herrenCsv && herrenCsv.trim()) {
+        const herrenRes = await fetch('/api/spieler/import', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            csv: herrenCsv,
+            geschlecht: 'herren',
+            ersetzen: true,
+          }),
+        });
+        if (!herrenRes.ok) {
+          const data = await herrenRes.json();
+          setMessage({ type: 'error', text: `Turnier erstellt, aber Herren-Import fehlgeschlagen: ${data.error}` });
+        }
+      }
+
+      // Import Damen if CSV provided
+      const damenCsv = (newTurnierData as any).damenCsv;
+      if (damenCsv && damenCsv.trim()) {
+        const damenRes = await fetch('/api/spieler/import', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            csv: damenCsv,
+            geschlecht: 'damen',
+            ersetzen: true,
+          }),
+        });
+        if (!damenRes.ok) {
+          const data = await damenRes.json();
+          setMessage({ type: 'error', text: `Turnier erstellt, aber Damen-Import fehlgeschlagen: ${data.error}` });
+        }
+      }
+
+      setMessage({ type: 'success', text: 'Turnier erstellt' + (herrenCsv || damenCsv ? ' und Spieler importiert' : '') });
       setShowNewTurnier(false);
       setNewTurnierData({ name: '', jahr: new Date().getFullYear().toString(), abgabeSchluss: '' });
       loadData();
-    } else {
-      const data = await res.json();
-      setMessage({ type: 'error', text: data.error });
+    } catch (err) {
+      setMessage({ type: 'error', text: 'Fehler beim Erstellen' });
     }
 
     setSaving(false);
@@ -227,34 +271,38 @@ export default function AdminTurnierPage() {
 
       {showNewTurnier && (
         <Card title="Neues Turnier erstellen">
-          <form onSubmit={handleCreateTurnier} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-              <select
-                value={newTurnierData.name}
-                onChange={e => setNewTurnierData({ ...newTurnierData, name: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                required
-              >
-                <option value="">Auswählen...</option>
-                <option value="Australian Open">Australian Open</option>
-                <option value="French Open">French Open</option>
-                <option value="Wimbledon">Wimbledon</option>
-                <option value="US Open">US Open</option>
-              </select>
+          <form onSubmit={handleCreateTurnier} className="space-y-6">
+            {/* Tournament Details */}
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                <select
+                  value={newTurnierData.name}
+                  onChange={e => setNewTurnierData({ ...newTurnierData, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  required
+                >
+                  <option value="">Auswählen...</option>
+                  <option value="Australian Open">Australian Open</option>
+                  <option value="French Open">French Open</option>
+                  <option value="Wimbledon">Wimbledon</option>
+                  <option value="US Open">US Open</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Jahr</label>
+                <input
+                  type="number"
+                  value={newTurnierData.jahr}
+                  onChange={e => setNewTurnierData({ ...newTurnierData, jahr: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  min="2024"
+                  max="2030"
+                  required
+                />
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Jahr</label>
-              <input
-                type="number"
-                value={newTurnierData.jahr}
-                onChange={e => setNewTurnierData({ ...newTurnierData, jahr: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                min="2024"
-                max="2030"
-                required
-              />
-            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Abgabeschluss</label>
               <input
@@ -264,12 +312,57 @@ export default function AdminTurnierPage() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
               />
               <p className="text-sm text-gray-500 mt-1">
-                Nach diesem Zeitpunkt können keine Tipps mehr abgegeben werden und alle Tipps werden sichtbar.
+                Nach diesem Zeitpunkt können keine Tipps mehr abgegeben werden.
               </p>
             </div>
-            <div className="flex gap-2">
+
+            {/* Player Import Section */}
+            <div className="border-t pt-4">
+              <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                <span>🎾</span> Spieler hinzufügen (optional)
+              </h4>
+              <p className="text-sm text-gray-600 mb-4">
+                Du kannst Spieler per CSV importieren. Format: <code className="bg-gray-100 px-1 rounded">Ranking,Name</code> pro Zeile.
+              </p>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                {/* Herren CSV */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Herren (CSV)
+                  </label>
+                  <textarea
+                    value={(newTurnierData as any).herrenCsv || ''}
+                    onChange={e => setNewTurnierData({ ...newTurnierData, herrenCsv: e.target.value } as any)}
+                    rows={5}
+                    placeholder="1,Jannik Sinner&#10;2,Alexander Zverev&#10;3,Carlos Alcaraz&#10;..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md font-mono text-xs"
+                  />
+                </div>
+
+                {/* Damen CSV */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Damen (CSV)
+                  </label>
+                  <textarea
+                    value={(newTurnierData as any).damenCsv || ''}
+                    onChange={e => setNewTurnierData({ ...newTurnierData, damenCsv: e.target.value } as any)}
+                    rows={5}
+                    placeholder="1,Aryna Sabalenka&#10;2,Iga Swiatek&#10;3,Coco Gauff&#10;..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md font-mono text-xs"
+                  />
+                </div>
+              </div>
+
+              <p className="text-xs text-gray-500 mt-2">
+                Tipp: Kopiere die Rankings von der ATP/WTA Website. Leer lassen, um bestehende Spieler zu behalten.
+              </p>
+            </div>
+
+            <div className="flex gap-2 pt-2">
               <Button type="submit" disabled={saving}>
-                {saving ? 'Erstellen...' : 'Erstellen'}
+                {saving ? 'Erstellen...' : 'Turnier erstellen'}
               </Button>
               <Button type="button" variant="secondary" onClick={() => setShowNewTurnier(false)}>
                 Abbrechen
@@ -401,19 +494,17 @@ export default function AdminTurnierPage() {
                                   setSpielerSearch(s.name);
                                   setShowSpielerSuggestions(false);
                                 }}
-                                className={`w-full px-3 py-2 text-left flex items-center gap-2 ${
-                                  isPicked ? 'bg-green-50 hover:bg-green-100' : 'hover:bg-gray-100'
-                                }`}
+                                className={`w-full px-3 py-2 text-left flex items-center gap-2 ${isPicked ? 'bg-green-50 hover:bg-green-100' : 'hover:bg-gray-100'
+                                  }`}
                               >
                                 <span className="text-gray-500 w-8 text-right font-mono text-sm">
                                   {s.ranking}
                                 </span>
                                 <span className="font-medium">{s.name}</span>
-                                <span className={`text-xs px-1.5 py-0.5 rounded ${
-                                  s.id.startsWith('h')
-                                    ? 'bg-blue-100 text-blue-700'
-                                    : 'bg-pink-100 text-pink-700'
-                                }`}>
+                                <span className={`text-xs px-1.5 py-0.5 rounded ${s.id.startsWith('h')
+                                  ? 'bg-blue-100 text-blue-700'
+                                  : 'bg-pink-100 text-pink-700'
+                                  }`}>
                                   {s.id.startsWith('h') ? 'H' : 'D'}
                                 </span>
                                 {isPicked && (
@@ -491,9 +582,8 @@ export default function AdminTurnierPage() {
                     return (
                       <div
                         key={s.id}
-                        className={`flex items-center justify-between py-1 px-2 rounded ${
-                          isWinner ? 'bg-yellow-50' : isOut ? 'bg-red-50' : 'bg-green-50'
-                        }`}
+                        className={`flex items-center justify-between py-1 px-2 rounded ${isWinner ? 'bg-yellow-50' : isOut ? 'bg-red-50' : 'bg-green-50'
+                          }`}
                       >
                         <div className="flex items-center gap-2 flex-1 min-w-0">
                           <span className="text-gray-400 text-xs w-5 flex-shrink-0">{s.ranking}</span>
@@ -597,9 +687,8 @@ export default function AdminTurnierPage() {
                     return (
                       <div
                         key={s.id}
-                        className={`flex items-center justify-between py-1 px-2 rounded ${
-                          isWinner ? 'bg-yellow-50' : isOut ? 'bg-red-50' : 'bg-green-50'
-                        }`}
+                        className={`flex items-center justify-between py-1 px-2 rounded ${isWinner ? 'bg-yellow-50' : isOut ? 'bg-red-50' : 'bg-green-50'
+                          }`}
                       >
                         <div className="flex items-center gap-2 flex-1 min-w-0">
                           <span className="text-gray-400 text-xs w-5 flex-shrink-0">{s.ranking}</span>
