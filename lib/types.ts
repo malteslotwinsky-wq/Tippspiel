@@ -65,5 +65,5 @@ export const PUNKTE_PRO_RUNDE: Record<Runde, number> = {
   4: 2,
   5: 3,
   6: 4,
-  7: 6, // 5 für Finale + 1 für Sieg = 6 kumulativ
+  7: 5, // Basispunkte für Finale, Sieger bekommt +1 extra = 6
 };

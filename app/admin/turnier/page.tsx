@@ -577,20 +577,24 @@ export default function AdminTurnierPage() {
                   return herrenSpieler.map(s => {
                     const currentRunde = s.ergebnis?.runde || 0;
                     const isOut = s.ergebnis?.out === true;
-                    const isWinner = currentRunde === 7;
+                    // Sieger = im Finale (7) und NICHT out
+                    const isInFinale = currentRunde === 7;
+                    const isSieger = isInFinale && !isOut;
+                    const isFinalist = isInFinale && isOut; // Im Finale, aber verloren
 
                     return (
                       <div
                         key={s.id}
-                        className={`flex items-center justify-between py-1 px-2 rounded ${isWinner ? 'bg-yellow-50' : isOut ? 'bg-red-50' : 'bg-green-50'
+                        className={`flex items-center justify-between py-1 px-2 rounded ${isSieger ? 'bg-yellow-50' : isFinalist ? 'bg-orange-50' : isOut ? 'bg-red-50' : 'bg-green-50'
                           }`}
                       >
                         <div className="flex items-center gap-2 flex-1 min-w-0">
                           <span className="text-gray-400 text-xs w-5 flex-shrink-0">{s.ranking}</span>
-                          <span className={`truncate ${isOut ? 'text-gray-500 line-through' : 'font-medium'}`}>
+                          <span className={`truncate ${isOut && !isInFinale ? 'text-gray-500 line-through' : 'font-medium'}`}>
                             {s.name}
                           </span>
-                          {isWinner && <span className="flex-shrink-0">🏆</span>}
+                          {isSieger && <span className="flex-shrink-0">🏆</span>}
+                          {isFinalist && <span className="flex-shrink-0 text-xs text-orange-600">Finalist</span>}
                         </div>
                         <div className="flex items-center gap-1 flex-shrink-0">
                           <select
@@ -604,7 +608,8 @@ export default function AdminTurnierPage() {
                                   { method: 'DELETE' }
                                 );
                               } else {
-                                // Set/update round, preserve out status
+                                // Set/update round
+                                // Wenn Finale ausgewählt wird, standardmäßig als Sieger (out: false)
                                 await fetch('/api/turnier/ergebnisse', {
                                   method: 'POST',
                                   headers: { 'Content-Type': 'application/json' },
@@ -612,6 +617,7 @@ export default function AdminTurnierPage() {
                                     turnierId: aktivTurnier.id,
                                     spielerId: s.id,
                                     runde: newRunde,
+                                    out: newRunde === 7 ? false : isOut, // Bei Finale: Sieger ist Standard
                                   }),
                                 });
                               }
@@ -628,27 +634,52 @@ export default function AdminTurnierPage() {
                             <option value={6}>HF</option>
                             <option value={7}>F</option>
                           </select>
-                          <label className="flex items-center gap-1 cursor-pointer ml-1">
-                            <input
-                              type="checkbox"
-                              checked={isOut}
-                              disabled={currentRunde === 0}
-                              onChange={async (e) => {
-                                await fetch('/api/turnier/ergebnisse', {
-                                  method: 'POST',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({
-                                    turnierId: aktivTurnier.id,
-                                    spielerId: s.id,
-                                    out: e.target.checked,
-                                  }),
-                                });
-                                loadData();
-                              }}
-                              className="w-4 h-4 text-red-600 rounded border-gray-300 disabled:opacity-50"
-                            />
-                            <span className={`text-xs font-medium ${currentRunde === 0 ? 'text-gray-400' : 'text-red-600'}`}>Out</span>
-                          </label>
+                          {/* Bei Finale: Sieger-Checkbox statt Out-Checkbox */}
+                          {isInFinale ? (
+                            <label className="flex items-center gap-1 cursor-pointer ml-1">
+                              <input
+                                type="checkbox"
+                                checked={isSieger}
+                                onChange={async (e) => {
+                                  // Sieger = out: false, Finalist (verloren) = out: true
+                                  await fetch('/api/turnier/ergebnisse', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                      turnierId: aktivTurnier.id,
+                                      spielerId: s.id,
+                                      out: !e.target.checked, // checked = Sieger = out: false
+                                    }),
+                                  });
+                                  loadData();
+                                }}
+                                className="w-4 h-4 text-green-600 rounded border-gray-300"
+                              />
+                              <span className="text-xs font-medium text-green-600">Sieger</span>
+                            </label>
+                          ) : (
+                            <label className="flex items-center gap-1 cursor-pointer ml-1">
+                              <input
+                                type="checkbox"
+                                checked={isOut}
+                                disabled={currentRunde === 0}
+                                onChange={async (e) => {
+                                  await fetch('/api/turnier/ergebnisse', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                      turnierId: aktivTurnier.id,
+                                      spielerId: s.id,
+                                      out: e.target.checked,
+                                    }),
+                                  });
+                                  loadData();
+                                }}
+                                className="w-4 h-4 text-red-600 rounded border-gray-300 disabled:opacity-50"
+                              />
+                              <span className={`text-xs font-medium ${currentRunde === 0 ? 'text-gray-400' : 'text-red-600'}`}>Out</span>
+                            </label>
+                          )}
                         </div>
                       </div>
                     );
@@ -682,20 +713,24 @@ export default function AdminTurnierPage() {
                   return damenSpieler.map(s => {
                     const currentRunde = s.ergebnis?.runde || 0;
                     const isOut = s.ergebnis?.out === true;
-                    const isWinner = currentRunde === 7;
+                    // Siegerin = im Finale (7) und NICHT out
+                    const isInFinale = currentRunde === 7;
+                    const isSiegerin = isInFinale && !isOut;
+                    const isFinalistin = isInFinale && isOut; // Im Finale, aber verloren
 
                     return (
                       <div
                         key={s.id}
-                        className={`flex items-center justify-between py-1 px-2 rounded ${isWinner ? 'bg-yellow-50' : isOut ? 'bg-red-50' : 'bg-green-50'
+                        className={`flex items-center justify-between py-1 px-2 rounded ${isSiegerin ? 'bg-yellow-50' : isFinalistin ? 'bg-orange-50' : isOut ? 'bg-red-50' : 'bg-green-50'
                           }`}
                       >
                         <div className="flex items-center gap-2 flex-1 min-w-0">
                           <span className="text-gray-400 text-xs w-5 flex-shrink-0">{s.ranking}</span>
-                          <span className={`truncate ${isOut ? 'text-gray-500 line-through' : 'font-medium'}`}>
+                          <span className={`truncate ${isOut && !isInFinale ? 'text-gray-500 line-through' : 'font-medium'}`}>
                             {s.name}
                           </span>
-                          {isWinner && <span className="flex-shrink-0">🏆</span>}
+                          {isSiegerin && <span className="flex-shrink-0">🏆</span>}
+                          {isFinalistin && <span className="flex-shrink-0 text-xs text-orange-600">Finalistin</span>}
                         </div>
                         <div className="flex items-center gap-1 flex-shrink-0">
                           <select
@@ -709,7 +744,8 @@ export default function AdminTurnierPage() {
                                   { method: 'DELETE' }
                                 );
                               } else {
-                                // Set/update round, preserve out status
+                                // Set/update round
+                                // Wenn Finale ausgewählt wird, standardmäßig als Siegerin (out: false)
                                 await fetch('/api/turnier/ergebnisse', {
                                   method: 'POST',
                                   headers: { 'Content-Type': 'application/json' },
@@ -717,6 +753,7 @@ export default function AdminTurnierPage() {
                                     turnierId: aktivTurnier.id,
                                     spielerId: s.id,
                                     runde: newRunde,
+                                    out: newRunde === 7 ? false : isOut, // Bei Finale: Siegerin ist Standard
                                   }),
                                 });
                               }
@@ -733,27 +770,52 @@ export default function AdminTurnierPage() {
                             <option value={6}>HF</option>
                             <option value={7}>F</option>
                           </select>
-                          <label className="flex items-center gap-1 cursor-pointer ml-1">
-                            <input
-                              type="checkbox"
-                              checked={isOut}
-                              disabled={currentRunde === 0}
-                              onChange={async (e) => {
-                                await fetch('/api/turnier/ergebnisse', {
-                                  method: 'POST',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({
-                                    turnierId: aktivTurnier.id,
-                                    spielerId: s.id,
-                                    out: e.target.checked,
-                                  }),
-                                });
-                                loadData();
-                              }}
-                              className="w-4 h-4 text-red-600 rounded border-gray-300 disabled:opacity-50"
-                            />
-                            <span className={`text-xs font-medium ${currentRunde === 0 ? 'text-gray-400' : 'text-red-600'}`}>Out</span>
-                          </label>
+                          {/* Bei Finale: Siegerin-Checkbox statt Out-Checkbox */}
+                          {isInFinale ? (
+                            <label className="flex items-center gap-1 cursor-pointer ml-1">
+                              <input
+                                type="checkbox"
+                                checked={isSiegerin}
+                                onChange={async (e) => {
+                                  // Siegerin = out: false, Finalistin (verloren) = out: true
+                                  await fetch('/api/turnier/ergebnisse', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                      turnierId: aktivTurnier.id,
+                                      spielerId: s.id,
+                                      out: !e.target.checked, // checked = Siegerin = out: false
+                                    }),
+                                  });
+                                  loadData();
+                                }}
+                                className="w-4 h-4 text-green-600 rounded border-gray-300"
+                              />
+                              <span className="text-xs font-medium text-green-600">Siegerin</span>
+                            </label>
+                          ) : (
+                            <label className="flex items-center gap-1 cursor-pointer ml-1">
+                              <input
+                                type="checkbox"
+                                checked={isOut}
+                                disabled={currentRunde === 0}
+                                onChange={async (e) => {
+                                  await fetch('/api/turnier/ergebnisse', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                      turnierId: aktivTurnier.id,
+                                      spielerId: s.id,
+                                      out: e.target.checked,
+                                    }),
+                                  });
+                                  loadData();
+                                }}
+                                className="w-4 h-4 text-red-600 rounded border-gray-300 disabled:opacity-50"
+                              />
+                              <span className={`text-xs font-medium ${currentRunde === 0 ? 'text-gray-400' : 'text-red-600'}`}>Out</span>
+                            </label>
+                          )}
                         </div>
                       </div>
                     );

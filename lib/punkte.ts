@@ -1,5 +1,8 @@
 import { Tipp, TurnierErgebnis, PunkteStand, Runde, PUNKTE_PRO_RUNDE } from './types';
 
+// Berechnet Punkte für einen einzelnen Spieler
+// Runde 7 (Finale) = 5 Punkte
+// Runde 7 + Sieger (out !== true) = 6 Punkte (+1 Bonus)
 export function berechnePunkteFuerSpieler(
   spielerId: string,
   ergebnisse: TurnierErgebnis[],
@@ -13,7 +16,14 @@ export function berechnePunkteFuerSpieler(
     return 0;
   }
 
-  return PUNKTE_PRO_RUNDE[spielerErgebnis.runde];
+  let punkte = PUNKTE_PRO_RUNDE[spielerErgebnis.runde];
+
+  // Sieger-Bonus: +1 wenn im Finale (runde 7) und NICHT ausgeschieden (out !== true)
+  if (spielerErgebnis.runde === 7 && spielerErgebnis.out !== true) {
+    punkte += 1; // Sieger bekommt 6 statt 5 Punkte
+  }
+
+  return punkte;
 }
 
 export function berechnePunkteFuerTipp(
@@ -37,14 +47,15 @@ export function berechnePunkteFuerTipp(
   }
 
   // Bonus für richtigen Siegertipp
+  // Sieger = Spieler mit runde 7 UND out !== true (hat das Finale gewonnen)
   let bonusHerren = 0;
   let bonusDamen = 0;
 
   const siegerHerren = turnierErgebnisse.find(
-    e => e.runde === 7 && e.spielerId.startsWith('h')
+    e => e.runde === 7 && e.spielerId.startsWith('h') && e.out !== true
   );
   const siegerDamen = turnierErgebnisse.find(
-    e => e.runde === 7 && e.spielerId.startsWith('d')
+    e => e.runde === 7 && e.spielerId.startsWith('d') && e.out !== true
   );
 
   if (siegerHerren && siegerHerren.spielerId === tipp.siegerHerren) {
@@ -111,8 +122,8 @@ export function getSpielerPunkteDetails(
   spielerIds: string[],
   ergebnisse: TurnierErgebnis[],
   turnierId: string
-): Map<string, { runde: Runde | null; punkte: number }> {
-  const details = new Map<string, { runde: Runde | null; punkte: number }>();
+): Map<string, { runde: Runde | null; punkte: number; isSieger?: boolean }> {
+  const details = new Map<string, { runde: Runde | null; punkte: number; isSieger?: boolean }>();
 
   for (const spielerId of spielerIds) {
     const ergebnis = ergebnisse.find(
@@ -120,9 +131,18 @@ export function getSpielerPunkteDetails(
     );
 
     if (ergebnis) {
+      let punkte = PUNKTE_PRO_RUNDE[ergebnis.runde];
+      const isSieger = ergebnis.runde === 7 && ergebnis.out !== true;
+
+      // Sieger-Bonus
+      if (isSieger) {
+        punkte += 1;
+      }
+
       details.set(spielerId, {
         runde: ergebnis.runde,
-        punkte: PUNKTE_PRO_RUNDE[ergebnis.runde],
+        punkte,
+        isSieger,
       });
     } else {
       details.set(spielerId, { runde: null, punkte: 0 });
