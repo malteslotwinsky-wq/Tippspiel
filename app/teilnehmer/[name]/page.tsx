@@ -111,13 +111,24 @@ export default function TeilnehmerTippPage() {
   function getSpielerStatus(id: string) {
     const ergebnis = ergebnisse.find(e => e.spielerId === id);
     if (!ergebnis) {
-      return { runde: null, nochDabei: true, rundenName: null, punkte: 0 };
+      return { runde: null, nochDabei: true, rundenName: null, punkte: 0, isSieger: false };
     }
+
+    // Basispunkte für die Runde
+    let punkte = PUNKTE_PRO_RUNDE[ergebnis.runde as Runde] || 0;
+
+    // Sieger-Bonus: +1 wenn im Finale (runde 7) und NICHT ausgeschieden
+    const isSieger = ergebnis.runde === 7 && ergebnis.out !== true;
+    if (isSieger) {
+      punkte += 1;
+    }
+
     return {
       runde: ergebnis.runde,
       nochDabei: ergebnis.out !== true,
       rundenName: RUNDEN_NAMEN[ergebnis.runde as Runde],
-      punkte: PUNKTE_PRO_RUNDE[ergebnis.runde as Runde] || 0,
+      punkte,
+      isSieger,
     };
   }
 

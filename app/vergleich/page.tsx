@@ -69,13 +69,24 @@ export default function VergleichPage() {
     function getSpielerStatus(id: string) {
         const ergebnis = ergebnisse.find(e => e.spielerId === id);
         if (!ergebnis) {
-            return { runde: null, nochDabei: true, rundenName: null, punkte: 0 };
+            return { runde: null, nochDabei: true, rundenName: null, punkte: 0, isSieger: false };
         }
+
+        // Basispunkte für die Runde
+        let punkte = PUNKTE_PRO_RUNDE[ergebnis.runde as Runde] || 0;
+
+        // Sieger-Bonus: +1 wenn im Finale (runde 7) und NICHT ausgeschieden
+        const isSieger = ergebnis.runde === 7 && ergebnis.out !== true;
+        if (isSieger) {
+            punkte += 1;
+        }
+
         return {
             runde: ergebnis.runde,
             nochDabei: ergebnis.out !== true,
             rundenName: RUNDEN_NAMEN[ergebnis.runde as Runde],
-            punkte: PUNKTE_PRO_RUNDE[ergebnis.runde as Runde] || 0,
+            punkte,
+            isSieger,
         };
     }
 
@@ -229,8 +240,8 @@ export default function VergleichPage() {
                                                     <div
                                                         key={id}
                                                         className={`p-2.5 rounded-lg flex items-center justify-between text-sm ${gemeinsam ? 'bg-blue-50 border border-blue-200' :
-                                                                status.nochDabei ? 'bg-emerald-50 border border-emerald-100' :
-                                                                    'bg-slate-50 border border-slate-100'
+                                                            status.nochDabei ? 'bg-emerald-50 border border-emerald-100' :
+                                                                'bg-slate-50 border border-slate-100'
                                                             }`}
                                                     >
                                                         <div className="flex items-center gap-1.5 min-w-0">
@@ -292,8 +303,8 @@ export default function VergleichPage() {
                                                     <div
                                                         key={id}
                                                         className={`p-2.5 rounded-lg flex items-center justify-between text-sm ${gemeinsam ? 'bg-blue-50 border border-blue-200' :
-                                                                status.nochDabei ? 'bg-emerald-50 border border-emerald-100' :
-                                                                    'bg-slate-50 border border-slate-100'
+                                                            status.nochDabei ? 'bg-emerald-50 border border-emerald-100' :
+                                                                'bg-slate-50 border border-slate-100'
                                                             }`}
                                                     >
                                                         <div className="flex items-center gap-1.5 min-w-0">
