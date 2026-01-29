@@ -626,7 +626,7 @@ export default function AdminTurnierPage() {
                             <option value={4}>AF</option>
                             <option value={5}>VF</option>
                             <option value={6}>HF</option>
-                            <option value={7}>Sieg</option>
+                            <option value={7}>F</option>
                           </select>
                           <label className="flex items-center gap-1 cursor-pointer ml-1">
                             <input
@@ -731,7 +731,7 @@ export default function AdminTurnierPage() {
                             <option value={4}>AF</option>
                             <option value={5}>VF</option>
                             <option value={6}>HF</option>
-                            <option value={7}>Sieg</option>
+                            <option value={7}>F</option>
                           </select>
                           <label className="flex items-center gap-1 cursor-pointer ml-1">
                             <input

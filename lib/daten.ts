@@ -177,6 +177,16 @@ export async function upsertErgebnis(ergebnis: TurnierErgebnis): Promise<void> {
   if (error) throw new Error(`Failed to upsert ergebnis: ${error.message}`);
 }
 
+export async function deleteErgebnis(turnierId: string, spielerId: string): Promise<void> {
+  const { error } = await supabase
+    .from('ergebnisse')
+    .delete()
+    .eq('turnier_id', turnierId)
+    .eq('spieler_id', spielerId);
+
+  if (error) throw new Error(`Failed to delete ergebnis: ${error.message}`);
+}
+
 // ============ TIPPS ============
 
 export async function getTipps(): Promise<Tipp[]> {

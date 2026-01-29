@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getErgebnisse, saveErgebnisse } from '@/lib/daten';
+import { getErgebnisse, upsertErgebnis, deleteErgebnis } from '@/lib/daten';
 import { TurnierErgebnis, Runde } from '@/lib/types';
 
 export async function GET(request: Request) {
@@ -34,23 +34,22 @@ export async function POST(request: Request) {
       );
     }
 
+    // Get existing result if any
     const ergebnisse = await getErgebnisse();
-
-    // Check if result already exists for this player and tournament
-    const existingIndex = ergebnisse.findIndex(
+    const existing = ergebnisse.find(
       e => e.spielerId === spielerId && e.turnierId === turnierId
     );
 
-    if (existingIndex !== -1) {
+    if (existing) {
       // Update existing - preserve values if not provided
-      if (runde !== undefined) {
-        ergebnisse[existingIndex].runde = parseInt(runde) as Runde;
-      }
-      if (out !== undefined) {
-        ergebnisse[existingIndex].out = out;
-      }
-      await saveErgebnisse(ergebnisse);
-      return NextResponse.json(ergebnisse[existingIndex], { status: 200 });
+      const updatedErgebnis: TurnierErgebnis = {
+        turnierId,
+        spielerId,
+        runde: runde !== undefined ? parseInt(runde) as Runde : existing.runde,
+        out: out !== undefined ? out : existing.out,
+      };
+      await upsertErgebnis(updatedErgebnis);
+      return NextResponse.json(updatedErgebnis, { status: 200 });
     } else {
       // Create new - runde is required for new entries
       if (!runde) {
@@ -65,8 +64,7 @@ export async function POST(request: Request) {
         runde: parseInt(runde) as Runde,
         out: out || false,
       };
-      ergebnisse.push(neuesErgebnis);
-      await saveErgebnisse(ergebnisse);
+      await upsertErgebnis(neuesErgebnis);
       return NextResponse.json(neuesErgebnis, { status: 201 });
     }
   } catch (error) {
@@ -90,12 +88,7 @@ export async function DELETE(request: Request) {
       );
     }
 
-    let ergebnisse = await getErgebnisse();
-    ergebnisse = ergebnisse.filter(
-      e => !(e.spielerId === spielerId && e.turnierId === turnierId)
-    );
-
-    await saveErgebnisse(ergebnisse);
+    await deleteErgebnis(turnierId, spielerId);
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json(
