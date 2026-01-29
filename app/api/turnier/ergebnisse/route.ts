@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getErgebnisse, upsertErgebnis, deleteErgebnis } from '@/lib/daten';
 import { TurnierErgebnis, Runde } from '@/lib/types';
 
@@ -49,6 +50,12 @@ export async function POST(request: Request) {
         out: out !== undefined ? out : existing.out,
       };
       await upsertErgebnis(updatedErgebnis);
+
+      // Revalidate pages that show rankings
+      revalidatePath('/rangliste');
+      revalidatePath('/vergleich');
+      revalidatePath('/teilnehmer');
+
       return NextResponse.json(updatedErgebnis, { status: 200 });
     } else {
       // Create new - runde is required for new entries
@@ -65,6 +72,12 @@ export async function POST(request: Request) {
         out: out || false,
       };
       await upsertErgebnis(neuesErgebnis);
+
+      // Revalidate pages that show rankings
+      revalidatePath('/rangliste');
+      revalidatePath('/vergleich');
+      revalidatePath('/teilnehmer');
+
       return NextResponse.json(neuesErgebnis, { status: 201 });
     }
   } catch (error) {
@@ -89,6 +102,12 @@ export async function DELETE(request: Request) {
     }
 
     await deleteErgebnis(turnierId, spielerId);
+
+    // Revalidate pages that show rankings
+    revalidatePath('/rangliste');
+    revalidatePath('/vergleich');
+    revalidatePath('/teilnehmer');
+
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json(

@@ -580,7 +580,13 @@ export default function AdminTurnierPage() {
                     // Sieger = im Finale (7) und NICHT out
                     const isInFinale = currentRunde === 7;
                     const isSieger = isInFinale && !isOut;
-                    const isFinalist = isInFinale && isOut; // Im Finale, aber verloren
+                    const isFinalist = isInFinale && isOut;
+
+                    // Dropdown-Wert: spezieller Wert für Finale vs Sieger
+                    // "7" = Finale (out=true), "7s" = Sieger (out=false)
+                    const dropdownValue = isInFinale
+                      ? (isSieger ? '7s' : '7f')
+                      : (currentRunde.toString());
 
                     return (
                       <div
@@ -594,75 +600,77 @@ export default function AdminTurnierPage() {
                             {s.name}
                           </span>
                           {isSieger && <span className="flex-shrink-0">🏆</span>}
-                          {isFinalist && <span className="flex-shrink-0 text-xs text-orange-600">Finalist</span>}
+                          {isFinalist && <span className="flex-shrink-0 text-xs text-orange-600">(Finalist)</span>}
                         </div>
                         <div className="flex items-center gap-1 flex-shrink-0">
+                          {/* Ein Dropdown mit Finale und Sieger als separate Optionen */}
                           <select
-                            value={currentRunde || 0}
+                            value={dropdownValue}
                             onChange={async (e) => {
-                              const newRunde = parseInt(e.target.value);
-                              if (newRunde === 0) {
+                              const val = e.target.value;
+                              if (val === '0') {
                                 // Remove result completely
                                 await fetch(
                                   `/api/turnier/ergebnisse?turnierId=${aktivTurnier.id}&spielerId=${s.id}`,
                                   { method: 'DELETE' }
                                 );
-                              } else {
-                                // Set/update round
-                                // Wenn Finale ausgewählt wird, standardmäßig als Sieger (out: false)
+                              } else if (val === '7f') {
+                                // Finale (Finalist, verloren) = runde 7, out: true
                                 await fetch('/api/turnier/ergebnisse', {
                                   method: 'POST',
                                   headers: { 'Content-Type': 'application/json' },
                                   body: JSON.stringify({
                                     turnierId: aktivTurnier.id,
                                     spielerId: s.id,
-                                    runde: newRunde,
-                                    out: newRunde === 7 ? false : isOut, // Bei Finale: Sieger ist Standard
+                                    runde: 7,
+                                    out: true,
+                                  }),
+                                });
+                              } else if (val === '7s') {
+                                // Sieger = runde 7, out: false
+                                await fetch('/api/turnier/ergebnisse', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({
+                                    turnierId: aktivTurnier.id,
+                                    spielerId: s.id,
+                                    runde: 7,
+                                    out: false,
+                                  }),
+                                });
+                              } else {
+                                // Normal round
+                                await fetch('/api/turnier/ergebnisse', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({
+                                    turnierId: aktivTurnier.id,
+                                    spielerId: s.id,
+                                    runde: parseInt(val),
+                                    out: isOut,
                                   }),
                                 });
                               }
                               loadData();
                             }}
-                            className="text-xs px-1 py-0.5 border rounded w-16 bg-white border-gray-300"
+                            className="text-xs px-1 py-0.5 border rounded w-20 bg-white border-gray-300"
                           >
-                            <option value={0}>-</option>
-                            <option value={1}>R1</option>
-                            <option value={2}>R2</option>
-                            <option value={3}>R3</option>
-                            <option value={4}>AF</option>
-                            <option value={5}>VF</option>
-                            <option value={6}>HF</option>
-                            <option value={7}>F</option>
+                            <option value="0">-</option>
+                            <option value="1">R1</option>
+                            <option value="2">R2</option>
+                            <option value="3">R3</option>
+                            <option value="4">AF</option>
+                            <option value="5">VF</option>
+                            <option value="6">HF</option>
+                            <option value="7f">Finale</option>
+                            <option value="7s">Sieger</option>
                           </select>
-                          {/* Bei Finale: Sieger-Checkbox statt Out-Checkbox */}
-                          {isInFinale ? (
-                            <label className="flex items-center gap-1 cursor-pointer ml-1">
-                              <input
-                                type="checkbox"
-                                checked={isSieger}
-                                onChange={async (e) => {
-                                  // Sieger = out: false, Finalist (verloren) = out: true
-                                  await fetch('/api/turnier/ergebnisse', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({
-                                      turnierId: aktivTurnier.id,
-                                      spielerId: s.id,
-                                      out: !e.target.checked, // checked = Sieger = out: false
-                                    }),
-                                  });
-                                  loadData();
-                                }}
-                                className="w-4 h-4 text-green-600 rounded border-gray-300"
-                              />
-                              <span className="text-xs font-medium text-green-600">Sieger</span>
-                            </label>
-                          ) : (
+                          {/* Out-Checkbox nur für normale Runden, NICHT für Finale/Sieger */}
+                          {!isInFinale && currentRunde > 0 && (
                             <label className="flex items-center gap-1 cursor-pointer ml-1">
                               <input
                                 type="checkbox"
                                 checked={isOut}
-                                disabled={currentRunde === 0}
                                 onChange={async (e) => {
                                   await fetch('/api/turnier/ergebnisse', {
                                     method: 'POST',
@@ -675,9 +683,9 @@ export default function AdminTurnierPage() {
                                   });
                                   loadData();
                                 }}
-                                className="w-4 h-4 text-red-600 rounded border-gray-300 disabled:opacity-50"
+                                className="w-4 h-4 text-red-600 rounded border-gray-300"
                               />
-                              <span className={`text-xs font-medium ${currentRunde === 0 ? 'text-gray-400' : 'text-red-600'}`}>Out</span>
+                              <span className="text-xs font-medium text-red-600">Out</span>
                             </label>
                           )}
                         </div>
@@ -716,7 +724,12 @@ export default function AdminTurnierPage() {
                     // Siegerin = im Finale (7) und NICHT out
                     const isInFinale = currentRunde === 7;
                     const isSiegerin = isInFinale && !isOut;
-                    const isFinalistin = isInFinale && isOut; // Im Finale, aber verloren
+                    const isFinalistin = isInFinale && isOut;
+
+                    // Dropdown-Wert: spezieller Wert für Finale vs Siegerin
+                    const dropdownValue = isInFinale
+                      ? (isSiegerin ? '7s' : '7f')
+                      : (currentRunde.toString());
 
                     return (
                       <div
@@ -730,75 +743,77 @@ export default function AdminTurnierPage() {
                             {s.name}
                           </span>
                           {isSiegerin && <span className="flex-shrink-0">🏆</span>}
-                          {isFinalistin && <span className="flex-shrink-0 text-xs text-orange-600">Finalistin</span>}
+                          {isFinalistin && <span className="flex-shrink-0 text-xs text-orange-600">(Finalistin)</span>}
                         </div>
                         <div className="flex items-center gap-1 flex-shrink-0">
+                          {/* Ein Dropdown mit Finale und Siegerin als separate Optionen */}
                           <select
-                            value={currentRunde || 0}
+                            value={dropdownValue}
                             onChange={async (e) => {
-                              const newRunde = parseInt(e.target.value);
-                              if (newRunde === 0) {
+                              const val = e.target.value;
+                              if (val === '0') {
                                 // Remove result completely
                                 await fetch(
                                   `/api/turnier/ergebnisse?turnierId=${aktivTurnier.id}&spielerId=${s.id}`,
                                   { method: 'DELETE' }
                                 );
-                              } else {
-                                // Set/update round
-                                // Wenn Finale ausgewählt wird, standardmäßig als Siegerin (out: false)
+                              } else if (val === '7f') {
+                                // Finale (Finalistin, verloren) = runde 7, out: true
                                 await fetch('/api/turnier/ergebnisse', {
                                   method: 'POST',
                                   headers: { 'Content-Type': 'application/json' },
                                   body: JSON.stringify({
                                     turnierId: aktivTurnier.id,
                                     spielerId: s.id,
-                                    runde: newRunde,
-                                    out: newRunde === 7 ? false : isOut, // Bei Finale: Siegerin ist Standard
+                                    runde: 7,
+                                    out: true,
+                                  }),
+                                });
+                              } else if (val === '7s') {
+                                // Siegerin = runde 7, out: false
+                                await fetch('/api/turnier/ergebnisse', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({
+                                    turnierId: aktivTurnier.id,
+                                    spielerId: s.id,
+                                    runde: 7,
+                                    out: false,
+                                  }),
+                                });
+                              } else {
+                                // Normal round
+                                await fetch('/api/turnier/ergebnisse', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({
+                                    turnierId: aktivTurnier.id,
+                                    spielerId: s.id,
+                                    runde: parseInt(val),
+                                    out: isOut,
                                   }),
                                 });
                               }
                               loadData();
                             }}
-                            className="text-xs px-1 py-0.5 border rounded w-16 bg-white border-gray-300"
+                            className="text-xs px-1 py-0.5 border rounded w-20 bg-white border-gray-300"
                           >
-                            <option value={0}>-</option>
-                            <option value={1}>R1</option>
-                            <option value={2}>R2</option>
-                            <option value={3}>R3</option>
-                            <option value={4}>AF</option>
-                            <option value={5}>VF</option>
-                            <option value={6}>HF</option>
-                            <option value={7}>F</option>
+                            <option value="0">-</option>
+                            <option value="1">R1</option>
+                            <option value="2">R2</option>
+                            <option value="3">R3</option>
+                            <option value="4">AF</option>
+                            <option value="5">VF</option>
+                            <option value="6">HF</option>
+                            <option value="7f">Finale</option>
+                            <option value="7s">Siegerin</option>
                           </select>
-                          {/* Bei Finale: Siegerin-Checkbox statt Out-Checkbox */}
-                          {isInFinale ? (
-                            <label className="flex items-center gap-1 cursor-pointer ml-1">
-                              <input
-                                type="checkbox"
-                                checked={isSiegerin}
-                                onChange={async (e) => {
-                                  // Siegerin = out: false, Finalistin (verloren) = out: true
-                                  await fetch('/api/turnier/ergebnisse', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({
-                                      turnierId: aktivTurnier.id,
-                                      spielerId: s.id,
-                                      out: !e.target.checked, // checked = Siegerin = out: false
-                                    }),
-                                  });
-                                  loadData();
-                                }}
-                                className="w-4 h-4 text-green-600 rounded border-gray-300"
-                              />
-                              <span className="text-xs font-medium text-green-600">Siegerin</span>
-                            </label>
-                          ) : (
+                          {/* Out-Checkbox nur für normale Runden, NICHT für Finale/Siegerin */}
+                          {!isInFinale && currentRunde > 0 && (
                             <label className="flex items-center gap-1 cursor-pointer ml-1">
                               <input
                                 type="checkbox"
                                 checked={isOut}
-                                disabled={currentRunde === 0}
                                 onChange={async (e) => {
                                   await fetch('/api/turnier/ergebnisse', {
                                     method: 'POST',
@@ -811,9 +826,9 @@ export default function AdminTurnierPage() {
                                   });
                                   loadData();
                                 }}
-                                className="w-4 h-4 text-red-600 rounded border-gray-300 disabled:opacity-50"
+                                className="w-4 h-4 text-red-600 rounded border-gray-300"
                               />
-                              <span className={`text-xs font-medium ${currentRunde === 0 ? 'text-gray-400' : 'text-red-600'}`}>Out</span>
+                              <span className="text-xs font-medium text-red-600">Out</span>
                             </label>
                           )}
                         </div>
